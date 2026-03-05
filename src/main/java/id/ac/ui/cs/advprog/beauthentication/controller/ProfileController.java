@@ -24,11 +24,13 @@ public class ProfileController {
             UserProfile user1 = new UserProfile();
             user1.setUsername("naufal_muzaki");
             user1.setEmail("naufal@example.com");
+            user1.setPassword("password123"); // Tambahan password dummy
             user1.setRole("CUSTOMER");
 
             UserProfile user2 = new UserProfile();
             user2.setUsername("asdos_reviewer");
             user2.setEmail("asdos@example.com");
+            user2.setPassword("admin123"); // Tambahan password dummy
             user2.setRole("ADMIN");
 
             repository.saveAll(List.of(user1, user2));
