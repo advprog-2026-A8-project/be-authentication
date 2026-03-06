@@ -1,5 +1,6 @@
 package id.ac.ui.cs.advprog.beauthentication.service;
 
+import id.ac.ui.cs.advprog.beauthentication.dto.LoginRequest;
 import id.ac.ui.cs.advprog.beauthentication.dto.RegisterRequest;
 import id.ac.ui.cs.advprog.beauthentication.model.UserProfile;
 import id.ac.ui.cs.advprog.beauthentication.repository.UserProfileRepository;
@@ -30,5 +31,18 @@ public class AuthService {
         user.setRole(request.getRole() != null ? request.getRole() : "CUSTOMER");
 
         return repository.save(user);
+    }
+
+    public UserProfile login(LoginRequest request){
+        // cari user dari username
+        UserProfile user = repository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new IllegalArgumentException("Username tidak ditemukan!"));
+
+        // cocokkan password
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Password salah!");
+        }
+
+        return user;
     }
 }
