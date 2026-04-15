@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuthService {
 
+    private static final int MIN_PASSWORD_LENGTH = 8;
+
     @Autowired
     private UserProfileRepository repository;
 
@@ -34,6 +36,10 @@ public class AuthService {
 
         if (isBlank(request.getUsername()) || isBlank(request.getEmail()) || isBlank(request.getPassword())) {
             throw new IllegalArgumentException("Username, email, dan password wajib diisi!");
+        }
+
+        if (request.getPassword().length() < MIN_PASSWORD_LENGTH) {
+            throw new IllegalArgumentException("Password minimal 8 karakter!");
         }
 
         String normalizedUsername = request.getUsername().trim();

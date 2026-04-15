@@ -187,6 +187,21 @@ class AuthControllerIntegrationTests {
     }
 
     @Test
+    void shouldRejectRegisterWithShortPassword() throws Exception {
+        Map<String, String> registerRequest = Map.of(
+                "username", "short_pass_user",
+                "email", "short_pass@example.com",
+                "password", "short1"
+        );
+
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(registerRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Password minimal 8 karakter!"));
+    }
+
+    @Test
     void shouldRejectLoginWithBlankRequiredFields() throws Exception {
         Map<String, String> loginRequest = Map.of(
                 "email", " ",
