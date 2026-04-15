@@ -34,4 +34,11 @@ class AuthSecurityIntegrationTests {
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk());
     }
+
+    @Test
+    void shouldRejectProtectedEndpointWithInvalidJwt() throws Exception {
+        mockMvc.perform(get("/api/profile/all")
+                        .header("Authorization", "Bearer invalid.token.value"))
+                .andExpect(status().isForbidden());
+    }
 }

@@ -9,9 +9,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.Map;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -141,5 +143,37 @@ class AuthControllerIntegrationTests {
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Format email tidak valid!"));
+    }
+
+    @Test
+    void shouldAccessProtectedEndpointUsingTokenFromLogin() throws Exception {
+        Map<String, String> registerRequest = Map.of(
+                "username", "e2e_user",
+                "email", "e2e_user@example.com",
+                "password", "password123"
+        );
+
+        Map<String, String> loginRequest = Map.of(
+                "email", "e2e_user@example.com",
+                "password", "password123"
+        );
+
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(registerRequest)))
+                .andExpect(status().isOk());
+
+        MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String responseBody = loginResult.getResponse().getContentAsString();
+        String token = objectMapper.readTree(responseBody).path("data").path("token").asText();
+
+        mockMvc.perform(get("/api/profile/all")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk());
     }
 }
