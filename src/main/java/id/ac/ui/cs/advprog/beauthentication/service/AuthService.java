@@ -34,9 +34,9 @@ public class AuthService {
     }
 
     public UserProfile login(LoginRequest request){
-        // cari user dari username
-        UserProfile user = repository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("Username tidak ditemukan!"));
+        // cari user dari email
+        UserProfile user = repository.findByEmail(request.getEmail())
+            .orElseThrow(() -> new IllegalArgumentException("Email tidak ditemukan!"));
 
         // cocokkan password
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
