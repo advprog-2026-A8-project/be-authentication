@@ -22,6 +22,10 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
 
+    private boolean isAuthenticationFailure(String message) {
+        return "Email tidak ditemukan!".equals(message) || "Password salah!".equals(message);
+    }
+
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<UserProfile>> register(@RequestBody RegisterRequest request) {
         try {
@@ -42,7 +46,11 @@ public class AuthController {
             
             return ResponseEntity.ok(new ApiResponse<>("Login berhasil!", new LoginResponse(token)));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            HttpStatus status = isAuthenticationFailure(e.getMessage())
+                    ? HttpStatus.UNAUTHORIZED
+                    : HttpStatus.BAD_REQUEST;
+
+            return ResponseEntity.status(status)
                     .body(new ApiResponse<>(e.getMessage(), null));
         }
     }
