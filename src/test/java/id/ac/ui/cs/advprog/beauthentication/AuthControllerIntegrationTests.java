@@ -81,6 +81,32 @@ class AuthControllerIntegrationTests {
     }
 
     @Test
+    void shouldRejectDuplicateRegisterByEmail() throws Exception {
+        Map<String, String> firstRegister = Map.of(
+                "username", "first_user",
+                "email", "same_email@example.com",
+                "password", "password123"
+        );
+
+        Map<String, String> secondRegister = Map.of(
+                "username", "second_user",
+                "email", "same_email@example.com",
+                "password", "password123"
+        );
+
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(firstRegister)))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(secondRegister)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Username atau Email sudah terdaftar!"));
+    }
+
+    @Test
     void shouldLoginSuccessfullyWithEmailAndPassword() throws Exception {
         Map<String, String> registerRequest = Map.of(
                 "username", "login_user",
@@ -143,6 +169,35 @@ class AuthControllerIntegrationTests {
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Format email tidak valid!"));
+    }
+
+    @Test
+    void shouldRejectRegisterWithBlankRequiredFields() throws Exception {
+        Map<String, String> registerRequest = Map.of(
+                "username", "   ",
+                "email", "",
+                "password", ""
+        );
+
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(registerRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Username, email, dan password wajib diisi!"));
+    }
+
+    @Test
+    void shouldRejectLoginWithBlankRequiredFields() throws Exception {
+        Map<String, String> loginRequest = Map.of(
+                "email", " ",
+                "password", ""
+        );
+
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Email dan password wajib diisi!"));
     }
 
     @Test
