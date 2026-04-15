@@ -4,6 +4,7 @@ import id.ac.ui.cs.advprog.beauthentication.dto.ApiResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.LoginRequest;
 import id.ac.ui.cs.advprog.beauthentication.dto.LoginResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.RegisterRequest;
+import id.ac.ui.cs.advprog.beauthentication.dto.RegisterResponse;
 import id.ac.ui.cs.advprog.beauthentication.model.UserProfile;
 import id.ac.ui.cs.advprog.beauthentication.service.AuthService;
 import id.ac.ui.cs.advprog.beauthentication.utils.JwtUtil;
@@ -26,12 +27,21 @@ public class AuthController {
         return "Email tidak ditemukan!".equals(message) || "Password salah!".equals(message);
     }
 
+    private RegisterResponse toRegisterResponse(UserProfile user) {
+        return new RegisterResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getRole()
+        );
+    }
+
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<UserProfile>> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<ApiResponse<RegisterResponse>> register(@RequestBody RegisterRequest request) {
         try {
             UserProfile user = authService.register(request);
             // Respons sukses berformat JSON
-            return ResponseEntity.ok(new ApiResponse<>("Registrasi berhasil!", user));
+            return ResponseEntity.ok(new ApiResponse<>("Registrasi berhasil!", toRegisterResponse(user)));
         } catch (IllegalArgumentException e) {
             // Respons gagal berformat JSON
             return ResponseEntity.badRequest().body(new ApiResponse<>(e.getMessage(), null));
