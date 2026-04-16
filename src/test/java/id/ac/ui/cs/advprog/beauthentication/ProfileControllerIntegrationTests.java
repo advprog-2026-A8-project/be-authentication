@@ -135,4 +135,58 @@ class ProfileControllerIntegrationTests {
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isForbidden());
     }
+
+    @Test
+    void shouldSubmitKycSuccessfully() throws Exception {
+        String token = registerAndLogin("kyc_user", "kyc_user@example.com", "password123");
+
+        Map<String, String> kycRequest = Map.of(
+                "fullName", "KYC User",
+                "identityDocumentUrl", "https://example.com/identity-doc",
+                "socialMediaUrl", "https://instagram.com/kyc_user"
+        );
+
+        mockMvc.perform(post("/api/profile/kyc/submit")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(kycRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Pengajuan KYC berhasil dikirim!"))
+                .andExpect(jsonPath("$.data.fullName").value("KYC User"))
+                .andExpect(jsonPath("$.data.identityDocumentUrl").value("https://example.com/identity-doc"))
+                .andExpect(jsonPath("$.data.socialMediaUrl").value("https://instagram.com/kyc_user"))
+                .andExpect(jsonPath("$.data.kycStatus").value("PENDING"));
+    }
+
+    @Test
+    void shouldRejectKycSubmitWithInvalidPayload() throws Exception {
+        String token = registerAndLogin("kyc_invalid_user", "kyc_invalid_user@example.com", "password123");
+
+        Map<String, String> invalidKycRequest = Map.of(
+                "fullName", "",
+                "identityDocumentUrl", "https://example.com/identity-doc",
+                "socialMediaUrl", ""
+        );
+
+        mockMvc.perform(post("/api/profile/kyc/submit")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidKycRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("fullName, identityDocumentUrl, dan socialMediaUrl wajib diisi!"));
+    }
+
+    @Test
+    void shouldRejectKycSubmitWithoutToken() throws Exception {
+        Map<String, String> kycRequest = Map.of(
+                "fullName", "No Token",
+                "identityDocumentUrl", "https://example.com/identity-doc",
+                "socialMediaUrl", "https://instagram.com/no_token"
+        );
+
+        mockMvc.perform(post("/api/profile/kyc/submit")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(kycRequest)))
+                .andExpect(status().isForbidden());
+    }
 }

@@ -1,6 +1,8 @@
 package id.ac.ui.cs.advprog.beauthentication.controller;
 
 import id.ac.ui.cs.advprog.beauthentication.dto.ApiResponse;
+import id.ac.ui.cs.advprog.beauthentication.dto.KycSubmissionRequest;
+import id.ac.ui.cs.advprog.beauthentication.dto.KycSubmissionResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.ProfileResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.UpdateProfileRequest;
 import id.ac.ui.cs.advprog.beauthentication.model.UserProfile;
@@ -10,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -53,6 +56,15 @@ public class ProfileController {
         return "Pengguna tidak ditemukan!".equals(message);
     }
 
+    private KycSubmissionResponse toKycSubmissionResponse(UserProfile user) {
+        return new KycSubmissionResponse(
+                user.getFullName(),
+                user.getKycIdentityDocumentUrl(),
+                user.getKycSocialMediaUrl(),
+                user.getKycStatus()
+        );
+    }
+
     @GetMapping("/all")
     public ResponseEntity<List<UserProfile>> getAllProfiles() {
         List<UserProfile> profiles = repository.findAll();
@@ -80,6 +92,22 @@ public class ProfileController {
             String username = resolveUsername(authentication);
             UserProfile updated = profileService.updateMyProfile(username, request);
             return ResponseEntity.ok(new ApiResponse<>("Profil berhasil diperbarui!", toProfileResponse(updated)));
+        } catch (IllegalArgumentException e) {
+            HttpStatus status = isNotFound(e.getMessage()) ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST;
+            return ResponseEntity.status(status)
+                    .body(new ApiResponse<>(e.getMessage(), null));
+        }
+    }
+
+    @PostMapping("/kyc/submit")
+    public ResponseEntity<ApiResponse<KycSubmissionResponse>> submitKyc(
+            @RequestBody KycSubmissionRequest request,
+            Authentication authentication
+    ) {
+        try {
+            String username = resolveUsername(authentication);
+            UserProfile updated = profileService.submitKyc(username, request);
+            return ResponseEntity.ok(new ApiResponse<>("Pengajuan KYC berhasil dikirim!", toKycSubmissionResponse(updated)));
         } catch (IllegalArgumentException e) {
             HttpStatus status = isNotFound(e.getMessage()) ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST;
             return ResponseEntity.status(status)
