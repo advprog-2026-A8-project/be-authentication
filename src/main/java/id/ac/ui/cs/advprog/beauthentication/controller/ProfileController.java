@@ -73,6 +73,14 @@ public class ProfileController {
         return ResponseEntity.ok(new ApiResponse<>("Daftar profil berhasil diambil!", profiles));
     }
 
+    @GetMapping("/jastiper")
+    public ResponseEntity<ApiResponse<List<ProfileResponse>>> getAllJastiperProfiles() {
+        List<ProfileResponse> profiles = profileService.getAllJastiperProfiles().stream()
+                .map(this::toProfileResponse)
+                .toList();
+        return ResponseEntity.ok(new ApiResponse<>("Daftar jastiper berhasil diambil!", profiles));
+    }
+
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<ProfileResponse>> getMyProfile(Authentication authentication) {
         try {

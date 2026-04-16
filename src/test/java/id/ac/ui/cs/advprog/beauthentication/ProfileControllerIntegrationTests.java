@@ -1,6 +1,7 @@
 package id.ac.ui.cs.advprog.beauthentication;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import id.ac.ui.cs.advprog.beauthentication.model.UserRole;
 import id.ac.ui.cs.advprog.beauthentication.model.UserProfile;
 import id.ac.ui.cs.advprog.beauthentication.repository.UserProfileRepository;
 import org.junit.jupiter.api.Assertions;
@@ -13,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -164,6 +166,41 @@ class ProfileControllerIntegrationTests {
         mockMvc.perform(get("/api/profile/me"))
                 .andExpect(status().isForbidden());
     }
+
+        @Test
+        void shouldRejectGetJastiperProfilesWithoutToken() throws Exception {
+                mockMvc.perform(get("/api/profile/jastiper"))
+                                .andExpect(status().isForbidden());
+        }
+
+        @Test
+        void shouldGetOnlyJastiperProfiles() throws Exception {
+                String token = registerAndLogin("viewer_user", "viewer_user@example.com", "password123");
+
+                UserProfile jastiper = new UserProfile();
+                jastiper.setUsername("jastiper_one");
+                jastiper.setEmail("jastiper_one@example.com");
+                jastiper.setPassword("dummy");
+                jastiper.setRole(UserRole.JASTIPER.name());
+                jastiper.setKycStatus("PENDING");
+
+                UserProfile nonJastiper = new UserProfile();
+                nonJastiper.setUsername("titiper_one");
+                nonJastiper.setEmail("titiper_one@example.com");
+                nonJastiper.setPassword("dummy");
+                nonJastiper.setRole(UserRole.TITIPER.name());
+                nonJastiper.setKycStatus("PENDING");
+
+                userProfileRepository.saveAll(List.of(jastiper, nonJastiper));
+
+                mockMvc.perform(get("/api/profile/jastiper")
+                                                .header("Authorization", "Bearer " + token))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.message").value("Daftar jastiper berhasil diambil!"))
+                                .andExpect(jsonPath("$.data.length()").value(1))
+                                .andExpect(jsonPath("$.data[0].username").value("jastiper_one"))
+                                .andExpect(jsonPath("$.data[0].role").value("JASTIPER"));
+        }
 
     @Test
     void shouldRejectUpdateMyProfileWithoutToken() throws Exception {

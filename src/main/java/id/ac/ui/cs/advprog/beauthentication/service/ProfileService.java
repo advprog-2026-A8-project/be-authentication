@@ -3,10 +3,13 @@ package id.ac.ui.cs.advprog.beauthentication.service;
 import id.ac.ui.cs.advprog.beauthentication.dto.KycSubmissionRequest;
 import id.ac.ui.cs.advprog.beauthentication.dto.UpdateProfileRequest;
 import id.ac.ui.cs.advprog.beauthentication.model.KycStatus;
+import id.ac.ui.cs.advprog.beauthentication.model.UserRole;
 import id.ac.ui.cs.advprog.beauthentication.model.UserProfile;
 import id.ac.ui.cs.advprog.beauthentication.repository.UserProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class ProfileService {
@@ -26,6 +29,10 @@ public class ProfileService {
 
     public UserProfile getByUsername(String username) {
         return getByPrincipal(username);
+    }
+
+    public List<UserProfile> getAllJastiperProfiles() {
+        return repository.findAllByRole(UserRole.JASTIPER.name());
     }
 
     public UserProfile updateMyProfile(String principalIdentifier, UpdateProfileRequest request) {
