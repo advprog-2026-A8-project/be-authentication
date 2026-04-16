@@ -139,6 +139,27 @@ class ProfileControllerIntegrationTests {
     }
 
     @Test
+    void shouldStillAccessProfileWithSameTokenAfterUsernameChange() throws Exception {
+        String token = registerAndLogin("token_stable_user", "token_stable_user@example.com", "password123");
+
+        Map<String, String> updateRequest = Map.of(
+                "username", "token_stable_user_updated"
+        );
+
+        mockMvc.perform(put("/api/profile/me")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.username").value("token_stable_user_updated"));
+
+        mockMvc.perform(get("/api/profile/me")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.username").value("token_stable_user_updated"));
+    }
+
+    @Test
     void shouldRejectGetMyProfileWithoutToken() throws Exception {
         mockMvc.perform(get("/api/profile/me"))
                 .andExpect(status().isForbidden());

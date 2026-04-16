@@ -18,17 +18,22 @@ public class ProfileService {
         return value == null || value.isBlank();
     }
 
-    public UserProfile getByUsername(String username) {
-        return repository.findByUsername(username)
+    private UserProfile getByPrincipal(String principalIdentifier) {
+        return repository.findByUsername(principalIdentifier)
+                .or(() -> repository.findByEmail(principalIdentifier))
                 .orElseThrow(() -> new IllegalArgumentException("Pengguna tidak ditemukan!"));
     }
 
-    public UserProfile updateMyProfile(String currentUsername, UpdateProfileRequest request) {
+    public UserProfile getByUsername(String username) {
+        return getByPrincipal(username);
+    }
+
+    public UserProfile updateMyProfile(String principalIdentifier, UpdateProfileRequest request) {
         if (request == null) {
             throw new IllegalArgumentException("Request tidak boleh kosong!");
         }
 
-        UserProfile currentUser = getByUsername(currentUsername);
+        UserProfile currentUser = getByPrincipal(principalIdentifier);
 
         if (request.getUsername() != null) {
             String newUsername = request.getUsername().trim();
@@ -55,7 +60,7 @@ public class ProfileService {
         return repository.save(currentUser);
     }
 
-    public UserProfile submitKyc(String currentUsername, KycSubmissionRequest request) {
+    public UserProfile submitKyc(String principalIdentifier, KycSubmissionRequest request) {
         if (request == null) {
             throw new IllegalArgumentException("Request tidak boleh kosong!");
         }
@@ -66,7 +71,7 @@ public class ProfileService {
             throw new IllegalArgumentException("fullName, identityDocumentUrl, dan socialMediaUrl wajib diisi!");
         }
 
-        UserProfile currentUser = getByUsername(currentUsername);
+        UserProfile currentUser = getByPrincipal(principalIdentifier);
         currentUser.setFullName(request.getFullName().trim());
         currentUser.setKycIdentityDocumentUrl(request.getIdentityDocumentUrl().trim());
         currentUser.setKycSocialMediaUrl(request.getSocialMediaUrl().trim());
