@@ -29,25 +29,48 @@ public class AuthService {
         return atIndex > 0 && dotIndex > atIndex + 1 && dotIndex < email.length() - 1;
     }
 
+    private String generateUsername(String normalizedEmail) {
+        int atIndex = normalizedEmail.indexOf('@');
+        String localPart = atIndex > 0 ? normalizedEmail.substring(0, atIndex) : normalizedEmail;
+        String baseUsername = localPart.replaceAll("[^a-z0-9]", "_");
+
+        if (baseUsername.isBlank()) {
+            baseUsername = "user";
+        }
+
+        String candidate = baseUsername;
+        int suffix = 1;
+
+        while (repository.findByUsername(candidate).isPresent()) {
+            candidate = baseUsername + "_" + suffix;
+            suffix++;
+        }
+
+        return candidate;
+    }
+
     public UserProfile register(RegisterRequest request) {
         if (request == null) {
             throw new IllegalArgumentException("Request tidak boleh kosong!");
         }
 
-        if (isBlank(request.getUsername()) || isBlank(request.getEmail()) || isBlank(request.getPassword())) {
-            throw new IllegalArgumentException("Username, email, dan password wajib diisi!");
+        if (isBlank(request.getEmail()) || isBlank(request.getPassword())) {
+            throw new IllegalArgumentException("Email dan password wajib diisi!");
         }
 
         if (request.getPassword().length() < MIN_PASSWORD_LENGTH) {
             throw new IllegalArgumentException("Password minimal 8 karakter!");
         }
 
-        String normalizedUsername = request.getUsername().trim();
         String normalizedEmail = request.getEmail().trim().toLowerCase();
 
         if (!isValidEmail(normalizedEmail)) {
             throw new IllegalArgumentException("Format email tidak valid!");
         }
+
+        String normalizedUsername = isBlank(request.getUsername())
+                ? generateUsername(normalizedEmail)
+                : request.getUsername().trim();
 
         if (repository.findByUsername(normalizedUsername).isPresent() ||
                 repository.findByEmail(normalizedEmail).isPresent()) {

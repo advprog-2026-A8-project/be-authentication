@@ -51,7 +51,26 @@ class AuthControllerIntegrationTests {
                 .andExpect(jsonPath("$.message").value("Registrasi berhasil!"))
                 .andExpect(jsonPath("$.data.username").value("new_user"))
                 .andExpect(jsonPath("$.data.email").value("new_user@example.com"))
+                .andExpect(jsonPath("$.data.role").value("TITIPER"))
+                .andExpect(jsonPath("$.data.kycStatus").value("PENDING"))
                 .andExpect(jsonPath("$.data.password").doesNotExist());
+    }
+
+    @Test
+    void shouldAutoGenerateUsernameWhenNotProvided() throws Exception {
+        Map<String, String> registerRequest = Map.of(
+                "email", "auto.username@example.com",
+                "password", "password123"
+        );
+
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(registerRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.username").isString())
+                .andExpect(jsonPath("$.data.username").isNotEmpty())
+                .andExpect(jsonPath("$.data.role").value("TITIPER"))
+                .andExpect(jsonPath("$.data.kycStatus").value("PENDING"));
     }
 
     @Test
@@ -183,7 +202,7 @@ class AuthControllerIntegrationTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(registerRequest)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Username, email, dan password wajib diisi!"));
+                .andExpect(jsonPath("$.message").value("Email dan password wajib diisi!"));
     }
 
     @Test
