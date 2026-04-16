@@ -2,6 +2,7 @@ package id.ac.ui.cs.advprog.beauthentication.service;
 
 import id.ac.ui.cs.advprog.beauthentication.dto.KycSubmissionRequest;
 import id.ac.ui.cs.advprog.beauthentication.dto.UpdateProfileRequest;
+import id.ac.ui.cs.advprog.beauthentication.model.KycStatus;
 import id.ac.ui.cs.advprog.beauthentication.model.UserProfile;
 import id.ac.ui.cs.advprog.beauthentication.repository.UserProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +70,7 @@ public class ProfileService {
         currentUser.setFullName(request.getFullName().trim());
         currentUser.setKycIdentityDocumentUrl(request.getIdentityDocumentUrl().trim());
         currentUser.setKycSocialMediaUrl(request.getSocialMediaUrl().trim());
-        currentUser.setKycStatus("PENDING");
+        currentUser.setKycStatus(KycStatus.PENDING.name());
 
         return repository.save(currentUser);
     }

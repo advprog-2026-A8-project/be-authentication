@@ -1,6 +1,8 @@
 package id.ac.ui.cs.advprog.beauthentication.config;
 
+import id.ac.ui.cs.advprog.beauthentication.model.KycStatus;
 import id.ac.ui.cs.advprog.beauthentication.model.UserProfile;
+import id.ac.ui.cs.advprog.beauthentication.model.UserRole;
 import id.ac.ui.cs.advprog.beauthentication.repository.UserProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -25,15 +27,15 @@ public class DataSeeder implements CommandLineRunner {
             user1.setUsername("naufal_muzaki");
             user1.setEmail("naufal@example.com");
             user1.setPassword(passwordEncoder.encode("password123"));
-            user1.setRole("TITIPER");
-            user1.setKycStatus("PENDING");
+            user1.setRole(UserRole.TITIPER.name());
+            user1.setKycStatus(KycStatus.PENDING.name());
 
             UserProfile user2 = new UserProfile();
             user2.setUsername("asdos_reviewer");
             user2.setEmail("asdos@example.com");
             user2.setPassword(passwordEncoder.encode("admin123"));
-            user2.setRole("ADMIN");
-            user2.setKycStatus("APPROVED");
+            user2.setRole(UserRole.ADMIN.name());
+            user2.setKycStatus(KycStatus.APPROVED.name());
 
             repository.saveAll(List.of(user1, user2));
         }

@@ -2,7 +2,9 @@ package id.ac.ui.cs.advprog.beauthentication.service;
 
 import id.ac.ui.cs.advprog.beauthentication.dto.LoginRequest;
 import id.ac.ui.cs.advprog.beauthentication.dto.RegisterRequest;
+import id.ac.ui.cs.advprog.beauthentication.model.KycStatus;
 import id.ac.ui.cs.advprog.beauthentication.model.UserProfile;
+import id.ac.ui.cs.advprog.beauthentication.model.UserRole;
 import id.ac.ui.cs.advprog.beauthentication.repository.UserProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -82,8 +84,8 @@ public class AuthService {
         user.setEmail(normalizedEmail);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        user.setRole("TITIPER");
-        user.setKycStatus("PENDING");
+        user.setRole(UserRole.TITIPER.name());
+        user.setKycStatus(KycStatus.PENDING.name());
 
         return repository.save(user);
     }
