@@ -233,4 +233,73 @@ class ProfileControllerIntegrationTests {
                 .andExpect(jsonPath("$.data[0].kycIdentityDocumentUrl").doesNotExist())
                 .andExpect(jsonPath("$.data[0].kycSocialMediaUrl").doesNotExist());
     }
+
+    @Test
+    void shouldCompleteMilestone50FlowEndToEnd() throws Exception {
+        Map<String, String> registerRequest = Map.of(
+                "email", "milestone50@example.com",
+                "password", "password123"
+        );
+
+        MvcResult registerResult = mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(registerRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.role").value("TITIPER"))
+                .andExpect(jsonPath("$.data.kycStatus").value("PENDING"))
+                .andExpect(jsonPath("$.data.username").isString())
+                .andReturn();
+
+        String generatedUsername = objectMapper.readTree(registerResult.getResponse().getContentAsString())
+                .path("data").path("username").asText();
+
+        Map<String, String> loginRequest = Map.of(
+                "email", "milestone50@example.com",
+                "password", "password123"
+        );
+
+        MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String token = objectMapper.readTree(loginResult.getResponse().getContentAsString())
+                .path("data").path("token").asText();
+
+        Map<String, String> updateRequest = Map.of(
+                "fullName", "Milestone Fifty",
+                "phoneNumber", "08111111111",
+                "bio", "Profile updated in milestone 50"
+        );
+
+        mockMvc.perform(put("/api/profile/me")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.username").value(generatedUsername))
+                .andExpect(jsonPath("$.data.fullName").value("Milestone Fifty"));
+
+        Map<String, String> kycRequest = Map.of(
+                "fullName", "Milestone Fifty",
+                "identityDocumentUrl", "https://example.com/milestone50-doc",
+                "socialMediaUrl", "https://instagram.com/milestone50"
+        );
+
+        mockMvc.perform(post("/api/profile/kyc/submit")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(kycRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.kycStatus").value("PENDING"));
+
+        mockMvc.perform(get("/api/profile/me")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.username").value(generatedUsername))
+                .andExpect(jsonPath("$.data.fullName").value("Milestone Fifty"))
+                .andExpect(jsonPath("$.data.phoneNumber").value("08111111111"))
+                .andExpect(jsonPath("$.data.kycStatus").value("PENDING"));
+    }
 }
