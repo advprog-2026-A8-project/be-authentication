@@ -23,10 +23,28 @@ public class UserProfile {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Column(name = "full_name")
+    private String fullName;
+
+    @Column(name = "phone_number")
+    private String phoneNumber;
+
+    @Column(length = 500)
+    private String bio;
+
     @Column(nullable = false)
     @JsonIgnore
     private String password;
 
     @Column(nullable = false)
     private String role;
+
+    @Column(nullable = false)
+    private String kycStatus = "PENDING";
+
+    @Column(name = "kyc_identity_document_url")
+    private String kycIdentityDocumentUrl;
+
+    @Column(name = "kyc_social_media_url")
+    private String kycSocialMediaUrl;
 }

@@ -59,7 +59,8 @@ public class AuthService {
         user.setEmail(normalizedEmail);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        user.setRole("CUSTOMER");
+        user.setRole("TITIPER");
+        user.setKycStatus("PENDING");
 
         return repository.save(user);
     }
