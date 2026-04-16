@@ -41,4 +41,20 @@ class AuthSecurityIntegrationTests {
                         .header("Authorization", "Bearer invalid.token.value"))
                 .andExpect(status().isForbidden());
     }
+
+    @Test
+    void shouldAllowJastiperEndpointWithValidJwt() throws Exception {
+        String token = jwtUtil.generateToken("asdos_reviewer");
+
+        mockMvc.perform(get("/api/profile/jastiper")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void shouldRejectJastiperEndpointWithInvalidJwt() throws Exception {
+        mockMvc.perform(get("/api/profile/jastiper")
+                        .header("Authorization", "Bearer invalid.token.value"))
+                .andExpect(status().isForbidden());
+    }
 }
