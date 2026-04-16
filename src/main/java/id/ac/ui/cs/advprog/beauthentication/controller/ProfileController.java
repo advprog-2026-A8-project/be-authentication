@@ -66,9 +66,11 @@ public class ProfileController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<UserProfile>> getAllProfiles() {
-        List<UserProfile> profiles = repository.findAll();
-        return ResponseEntity.ok(profiles);
+    public ResponseEntity<ApiResponse<List<ProfileResponse>>> getAllProfiles() {
+        List<ProfileResponse> profiles = repository.findAll().stream()
+                .map(this::toProfileResponse)
+                .toList();
+        return ResponseEntity.ok(new ApiResponse<>("Daftar profil berhasil diambil!", profiles));
     }
 
     @GetMapping("/me")

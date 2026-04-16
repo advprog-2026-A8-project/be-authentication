@@ -207,4 +207,30 @@ class ProfileControllerIntegrationTests {
                         .content(objectMapper.writeValueAsString(kycRequest)))
                 .andExpect(status().isForbidden());
     }
+
+    @Test
+    void shouldNotExposeKycDocumentUrlsInProfileList() throws Exception {
+        String token = registerAndLogin("list_user", "list_user@example.com", "password123");
+
+        Map<String, String> kycRequest = Map.of(
+                "fullName", "List User",
+                "identityDocumentUrl", "https://example.com/private-doc",
+                "socialMediaUrl", "https://instagram.com/list_user"
+        );
+
+        mockMvc.perform(post("/api/profile/kyc/submit")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(kycRequest)))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/profile/all")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Daftar profil berhasil diambil!"))
+                .andExpect(jsonPath("$.data[0].username").value("list_user"))
+                .andExpect(jsonPath("$.data[0].kycStatus").value("PENDING"))
+                .andExpect(jsonPath("$.data[0].kycIdentityDocumentUrl").doesNotExist())
+                .andExpect(jsonPath("$.data[0].kycSocialMediaUrl").doesNotExist());
+    }
 }
