@@ -27,7 +27,7 @@ public class DataSeeder implements CommandLineRunner {
             user1.setUsername("naufal_muzaki");
             user1.setEmail("naufal@example.com");
             user1.setPassword(passwordEncoder.encode("password123"));
-            user1.setRole(UserRole.TITIPER.name());
+            user1.setRole(UserRole.JASTIPER.name());
             user1.setKycStatus(KycStatus.PENDING.name());
 
             UserProfile user2 = new UserProfile();
