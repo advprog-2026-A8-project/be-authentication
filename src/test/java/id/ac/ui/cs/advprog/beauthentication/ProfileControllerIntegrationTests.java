@@ -119,6 +119,24 @@ class ProfileControllerIntegrationTests {
     }
 
     @Test
+    void shouldKeepUsernameWhenBlankUsernameProvidedInUpdate() throws Exception {
+        String token = registerAndLogin("stable_user", "stable_user@example.com", "password123");
+
+        Map<String, String> updateRequest = Map.of(
+                "username", "   ",
+                "fullName", "Stable Name"
+        );
+
+        mockMvc.perform(put("/api/profile/me")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.username").value("stable_user"))
+                .andExpect(jsonPath("$.data.fullName").value("Stable Name"));
+    }
+
+    @Test
     void shouldRejectGetMyProfileWithoutToken() throws Exception {
         mockMvc.perform(get("/api/profile/me"))
                 .andExpect(status().isForbidden());
