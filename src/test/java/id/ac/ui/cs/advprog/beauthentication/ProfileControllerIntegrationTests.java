@@ -1,7 +1,9 @@
 package id.ac.ui.cs.advprog.beauthentication;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import id.ac.ui.cs.advprog.beauthentication.model.UserProfile;
 import id.ac.ui.cs.advprog.beauthentication.repository.UserProfileRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -301,5 +303,54 @@ class ProfileControllerIntegrationTests {
                 .andExpect(jsonPath("$.data.fullName").value("Milestone Fifty"))
                 .andExpect(jsonPath("$.data.phoneNumber").value("08111111111"))
                 .andExpect(jsonPath("$.data.kycStatus").value("PENDING"));
+    }
+
+    @Test
+    void shouldPersistProfileUpdateInDatabase() throws Exception {
+        String token = registerAndLogin("db_profile_user", "db_profile_user@example.com", "password123");
+
+        Map<String, String> updateRequest = Map.of(
+                "fullName", "Persisted Profile",
+                "phoneNumber", "08222222222",
+                "bio", "Persisted bio"
+        );
+
+        mockMvc.perform(put("/api/profile/me")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isOk());
+
+        UserProfile savedUser = userProfileRepository.findByEmail("db_profile_user@example.com")
+                .orElseThrow(() -> new AssertionError("User seharusnya ada di database"));
+
+        Assertions.assertEquals("Persisted Profile", savedUser.getFullName());
+        Assertions.assertEquals("08222222222", savedUser.getPhoneNumber());
+        Assertions.assertEquals("Persisted bio", savedUser.getBio());
+    }
+
+    @Test
+    void shouldPersistKycDataInDatabase() throws Exception {
+        String token = registerAndLogin("db_kyc_user", "db_kyc_user@example.com", "password123");
+
+        Map<String, String> kycRequest = Map.of(
+                "fullName", "Persisted KYC User",
+                "identityDocumentUrl", "https://example.com/persisted-doc",
+                "socialMediaUrl", "https://instagram.com/persisted_kyc"
+        );
+
+        mockMvc.perform(post("/api/profile/kyc/submit")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(kycRequest)))
+                .andExpect(status().isOk());
+
+        UserProfile savedUser = userProfileRepository.findByEmail("db_kyc_user@example.com")
+                .orElseThrow(() -> new AssertionError("User seharusnya ada di database"));
+
+        Assertions.assertEquals("Persisted KYC User", savedUser.getFullName());
+        Assertions.assertEquals("https://example.com/persisted-doc", savedUser.getKycIdentityDocumentUrl());
+        Assertions.assertEquals("https://instagram.com/persisted_kyc", savedUser.getKycSocialMediaUrl());
+        Assertions.assertEquals("PENDING", savedUser.getKycStatus());
     }
 }
