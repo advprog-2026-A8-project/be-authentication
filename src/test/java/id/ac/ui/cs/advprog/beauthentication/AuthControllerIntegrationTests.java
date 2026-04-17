@@ -2,6 +2,8 @@ package id.ac.ui.cs.advprog.beauthentication;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import id.ac.ui.cs.advprog.beauthentication.repository.UserProfileRepository;
+import id.ac.ui.cs.advprog.beauthentication.utils.JwtUtil;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +32,9 @@ class AuthControllerIntegrationTests {
 
     @Autowired
     private UserProfileRepository userProfileRepository;
+
+        @Autowired
+        private JwtUtil jwtUtil;
 
     @BeforeEach
     void setUp() {
@@ -175,12 +180,19 @@ class AuthControllerIntegrationTests {
                         .content(objectMapper.writeValueAsString(registerRequest)))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(post("/api/auth/login")
+        MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Login berhasil!"))
-                .andExpect(jsonPath("$.data.token").isString());
+                .andExpect(jsonPath("$.data.token").isString())
+                .andReturn();
+
+        String token = objectMapper.readTree(loginResult.getResponse().getContentAsString())
+                .path("data").path("token").asText();
+
+        Assertions.assertEquals("TITIPER", jwtUtil.extractRole(token));
+        Assertions.assertEquals("login_user@example.com", jwtUtil.extractUsername(token));
     }
 
     @Test

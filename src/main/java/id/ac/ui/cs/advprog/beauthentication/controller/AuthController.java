@@ -53,7 +53,7 @@ public class AuthController {
     public ResponseEntity<ApiResponse<LoginResponse>> login(@RequestBody LoginRequest request) {
         try {
             UserProfile user = authService.login(request);
-            String token = jwtUtil.generateToken(user.getEmail());
+            String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
             
             return ResponseEntity.ok(new ApiResponse<>("Login berhasil!", new LoginResponse(token)));
         } catch (IllegalArgumentException e) {

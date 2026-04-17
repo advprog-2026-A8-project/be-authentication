@@ -1,5 +1,6 @@
 package id.ac.ui.cs.advprog.beauthentication.utils;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -12,6 +13,8 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
+    private static final String ROLE_CLAIM = "role";
+
     @Value("${jwt.secret}")
     private String secret;
 
@@ -23,26 +26,47 @@ public class JwtUtil {
     }
 
     public String generateToken(String username) {
-        return Jwts.builder()
+        return generateToken(username, null);
+    }
+
+    public String generateToken(String username, String role) {
+        var builder = Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .setExpiration(new Date(System.currentTimeMillis() + expiration));
+
+        if (role != null && !role.isBlank()) {
+            builder.claim(ROLE_CLAIM, role);
+        }
+
+        return builder
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    public String extractUsername(String token) {
+    private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
                 .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+                .getBody();
+    }
+
+    public String extractRole(String token) {
+        return extractAllClaims(token).get(ROLE_CLAIM, String.class);
+    }
+
+    public Date extractExpiration(String token) {
+        return extractAllClaims(token).getExpiration();
+    }
+
+    public String extractUsername(String token) {
+        return extractAllClaims(token).getSubject();
     }
 
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token);
+            extractAllClaims(token);
             return true;
         } catch (Exception e) {
             return false;
