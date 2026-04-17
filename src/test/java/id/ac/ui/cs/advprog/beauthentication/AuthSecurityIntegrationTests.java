@@ -1,6 +1,7 @@
 package id.ac.ui.cs.advprog.beauthentication;
 
 import id.ac.ui.cs.advprog.beauthentication.utils.JwtUtil;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -28,11 +29,13 @@ class AuthSecurityIntegrationTests {
 
     @Test
     void shouldAllowProtectedEndpointWithValidJwt() throws Exception {
-        String token = jwtUtil.generateToken("asdos_reviewer");
+        String token = jwtUtil.generateToken("asdos_reviewer", "ADMIN");
 
         mockMvc.perform(get("/api/profile/all")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk());
+
+        Assertions.assertEquals("ADMIN", jwtUtil.extractRole(token));
     }
 
     @Test
@@ -44,7 +47,7 @@ class AuthSecurityIntegrationTests {
 
     @Test
     void shouldAllowJastiperEndpointWithValidJwt() throws Exception {
-        String token = jwtUtil.generateToken("asdos_reviewer");
+        String token = jwtUtil.generateToken("asdos_reviewer", "ADMIN");
 
         mockMvc.perform(get("/api/profile/jastiper")
                         .header("Authorization", "Bearer " + token))
