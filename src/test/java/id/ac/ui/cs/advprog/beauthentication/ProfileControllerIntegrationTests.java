@@ -185,6 +185,35 @@ class ProfileControllerIntegrationTests {
     }
 
     @Test
+    void shouldLookupProfileByIdSuccessfully() throws Exception {
+        String token = registerAndLogin("lookup_id_user", "lookup_id_user@example.com", "password123");
+
+        Long userId = userProfileRepository.findByEmail("lookup_id_user@example.com")
+                .orElseThrow(() -> new AssertionError("User lookup_id_user harus ada")).getId();
+
+        mockMvc.perform(get("/api/profile/lookup")
+                        .header("Authorization", "Bearer " + token)
+                        .param("id", String.valueOf(userId)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Profil berhasil ditemukan!"))
+                .andExpect(jsonPath("$.data.id").value(userId))
+                .andExpect(jsonPath("$.data.email").value("lookup_id_user@example.com"));
+    }
+
+    @Test
+    void shouldLookupProfileByUsernameSuccessfully() throws Exception {
+        String token = registerAndLogin("lookup_username_user", "lookup_username_user@example.com", "password123");
+
+        mockMvc.perform(get("/api/profile/lookup")
+                        .header("Authorization", "Bearer " + token)
+                        .param("username", "lookup_username_user"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Profil berhasil ditemukan!"))
+                .andExpect(jsonPath("$.data.username").value("lookup_username_user"))
+                .andExpect(jsonPath("$.data.email").value("lookup_username_user@example.com"));
+    }
+
+    @Test
     void shouldRejectLookupProfileWithoutIdentifier() throws Exception {
         String token = registerAndLogin("lookup_req_user", "lookup_req_user@example.com", "password123");
 
@@ -193,6 +222,18 @@ class ProfileControllerIntegrationTests {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Salah satu identifier id, username, atau email wajib diisi!"));
     }
+
+        @Test
+        void shouldRejectLookupProfileWhenMultipleIdentifiersProvided() throws Exception {
+                String token = registerAndLogin("lookup_multi_user", "lookup_multi_user@example.com", "password123");
+
+                mockMvc.perform(get("/api/profile/lookup")
+                                                .header("Authorization", "Bearer " + token)
+                                                .param("username", "lookup_multi_user")
+                                                .param("email", "lookup_multi_user@example.com"))
+                                .andExpect(status().isBadRequest())
+                                .andExpect(jsonPath("$.message").value("Gunakan tepat satu identifier: id, username, atau email."));
+        }
 
     @Test
     void shouldReturnNotFoundWhenLookupProfileDoesNotExist() throws Exception {
@@ -256,6 +297,18 @@ class ProfileControllerIntegrationTests {
                 .andExpect(jsonPath("$.message").value("userIds wajib diisi!"));
     }
 
+        @Test
+        void shouldRejectBulkLookupWhenUserIdsContainsNull() throws Exception {
+                String token = registerAndLogin("bulk_null", "bulk_null@example.com", "password123");
+
+                mockMvc.perform(post("/api/profile/lookup/bulk")
+                                                .header("Authorization", "Bearer " + token)
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .content("{\"userIds\":[1,null,2]}"))
+                                .andExpect(status().isBadRequest())
+                                .andExpect(jsonPath("$.message").value("userIds tidak boleh berisi null!"));
+        }
+
     @Test
     void shouldRejectBulkLookupWithoutToken() throws Exception {
         Map<String, Object> request = Map.of(
@@ -292,6 +345,54 @@ class ProfileControllerIntegrationTests {
                 .orElseThrow(() -> new AssertionError("User target harus tetap ada"));
 
         Assertions.assertEquals(UserRole.JASTIPER.name(), updated.getRole());
+    }
+
+    @Test
+    void shouldRejectRoleUpgradeWhenUserIdMissing() throws Exception {
+        String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+
+        mockMvc.perform(put("/api/profile/admin/role/upgrade")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("userId wajib diisi!"));
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenRoleUpgradeUserDoesNotExist() throws Exception {
+        String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+
+        Map<String, Object> request = Map.of("userId", 999999L);
+
+        mockMvc.perform(put("/api/profile/admin/role/upgrade")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Pengguna tidak ditemukan!"));
+    }
+
+    @Test
+    void shouldRejectRoleUpgradeWhenTargetIsNotTitiper() throws Exception {
+        UserProfile adminTarget = new UserProfile();
+        adminTarget.setUsername("already_admin_target");
+        adminTarget.setEmail("already_admin_target@example.com");
+        adminTarget.setPassword("dummy");
+        adminTarget.setRole(UserRole.ADMIN.name());
+        adminTarget.setKycStatus("APPROVED");
+
+        UserProfile saved = userProfileRepository.save(adminTarget);
+        String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+
+        Map<String, Object> request = Map.of("userId", saved.getId());
+
+        mockMvc.perform(put("/api/profile/admin/role/upgrade")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Hanya user TITIPER yang dapat di-upgrade ke JASTIPER!"));
     }
 
     @Test
