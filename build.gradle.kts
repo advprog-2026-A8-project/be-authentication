@@ -55,6 +55,7 @@ sonar {
         property("sonar.projectKey", "advprog-2026-A8-project_be-authentication")
         property("sonar.organization", "advprog-2026-a8-project")
         property("sonar.host.url", "https://sonarcloud.io")
+        property("sonar.gradle.skipCompile", "true")
         property("sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml")
         property("sonar.coverage.exclusions", "**/dto/**,**/BeAuthenticationApplication.java")
         property("sonar.cpd.exclusions", "**/dto/**")
