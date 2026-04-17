@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -57,6 +58,32 @@ class AuthSecurityIntegrationTests {
     @Test
     void shouldRejectJastiperEndpointWithInvalidJwt() throws Exception {
         mockMvc.perform(get("/api/profile/jastiper")
+                        .header("Authorization", "Bearer invalid.token.value"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void shouldRejectVerifyEndpointWithoutToken() throws Exception {
+        mockMvc.perform(get("/api/auth/verify"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void shouldAllowVerifyEndpointWithValidJwt() throws Exception {
+        String token = jwtUtil.generateToken("verify_user@example.com", "JASTIPER");
+
+        mockMvc.perform(get("/api/auth/verify")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Token valid!"))
+                .andExpect(jsonPath("$.data.subject").value("verify_user@example.com"))
+                .andExpect(jsonPath("$.data.role").value("JASTIPER"))
+                .andExpect(jsonPath("$.data.expiresAt").isNumber());
+    }
+
+    @Test
+    void shouldRejectVerifyEndpointWithInvalidJwt() throws Exception {
+        mockMvc.perform(get("/api/auth/verify")
                         .header("Authorization", "Bearer invalid.token.value"))
                 .andExpect(status().isForbidden());
     }

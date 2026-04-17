@@ -5,6 +5,7 @@ import id.ac.ui.cs.advprog.beauthentication.dto.LoginRequest;
 import id.ac.ui.cs.advprog.beauthentication.dto.LoginResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.RegisterRequest;
 import id.ac.ui.cs.advprog.beauthentication.dto.RegisterResponse;
+import id.ac.ui.cs.advprog.beauthentication.dto.TokenVerifyResponse;
 import id.ac.ui.cs.advprog.beauthentication.model.UserProfile;
 import id.ac.ui.cs.advprog.beauthentication.service.AuthService;
 import id.ac.ui.cs.advprog.beauthentication.utils.JwtUtil;
@@ -37,6 +38,14 @@ public class AuthController {
         );
     }
 
+    private String extractBearerToken(String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new IllegalArgumentException("Header Authorization tidak valid!");
+        }
+
+        return authHeader.substring(7);
+    }
+
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<RegisterResponse>> register(@RequestBody RegisterRequest request) {
         try {
@@ -63,6 +72,25 @@ public class AuthController {
 
             return ResponseEntity.status(status)
                     .body(new ApiResponse<>(e.getMessage(), null));
+        }
+    }
+
+    @GetMapping("/verify")
+    public ResponseEntity<ApiResponse<TokenVerifyResponse>> verify(
+            @RequestHeader(value = "Authorization", required = false) String authHeader
+    ) {
+        try {
+            String token = extractBearerToken(authHeader);
+
+            TokenVerifyResponse response = new TokenVerifyResponse(
+                    jwtUtil.extractUsername(token),
+                    jwtUtil.extractRole(token),
+                    jwtUtil.extractExpiration(token).getTime()
+            );
+
+            return ResponseEntity.ok(new ApiResponse<>("Token valid!", response));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>(e.getMessage(), null));
         }
     }
 }

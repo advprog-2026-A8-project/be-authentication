@@ -29,7 +29,7 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll() // Izinkan register dan login tanpa token
+                        .requestMatchers("/api/auth/register", "/api/auth/login").permitAll() // Hanya register dan login yang public
                         .anyRequest().authenticated() // Kunci endpoint lainnya (harus pakai token)
                 )
                 // Ubah session menjadi STATELESS karena kita pakai token (tidak butuh session/cookies dari server)
