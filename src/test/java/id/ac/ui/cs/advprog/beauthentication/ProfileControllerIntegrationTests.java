@@ -37,8 +37,8 @@ class ProfileControllerIntegrationTests {
     @Autowired
     private UserProfileRepository userProfileRepository;
 
-        @Autowired
-        private JwtUtil jwtUtil;
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @BeforeEach
     void setUp() {
@@ -428,34 +428,34 @@ class ProfileControllerIntegrationTests {
                                 .andExpect(status().isForbidden());
         }
 
-        @Test
-        void shouldGetOnlyJastiperProfiles() throws Exception {
-                String token = registerAndLogin("viewer_user", "viewer_user@example.com", "password123");
+    @Test
+    void shouldGetOnlyJastiperProfiles() throws Exception {
+        String token = registerAndLogin("viewer_user", "viewer_user@example.com", "password123");
 
-                UserProfile jastiper = new UserProfile();
-                jastiper.setUsername("jastiper_one");
-                jastiper.setEmail("jastiper_one@example.com");
-                jastiper.setPassword("dummy");
-                jastiper.setRole(UserRole.JASTIPER.name());
-                jastiper.setKycStatus("PENDING");
+        UserProfile jastiper = new UserProfile();
+        jastiper.setUsername("jastiper_one");
+        jastiper.setEmail("jastiper_one@example.com");
+        jastiper.setPassword("dummy");
+        jastiper.setRole(UserRole.JASTIPER.name());
+        jastiper.setKycStatus("PENDING");
 
-                UserProfile nonJastiper = new UserProfile();
-                nonJastiper.setUsername("titiper_one");
-                nonJastiper.setEmail("titiper_one@example.com");
-                nonJastiper.setPassword("dummy");
-                nonJastiper.setRole(UserRole.TITIPER.name());
-                nonJastiper.setKycStatus("PENDING");
+        UserProfile nonJastiper = new UserProfile();
+        nonJastiper.setUsername("titiper_one");
+        nonJastiper.setEmail("titiper_one@example.com");
+        nonJastiper.setPassword("dummy");
+        nonJastiper.setRole(UserRole.TITIPER.name());
+        nonJastiper.setKycStatus("PENDING");
 
-                userProfileRepository.saveAll(List.of(jastiper, nonJastiper));
+        userProfileRepository.saveAll(List.of(jastiper, nonJastiper));
 
-                mockMvc.perform(get("/api/profile/jastiper")
-                                                .header("Authorization", "Bearer " + token))
-                                .andExpect(status().isOk())
-                                .andExpect(jsonPath("$.message").value("Daftar jastiper berhasil diambil!"))
-                                .andExpect(jsonPath("$.data.length()").value(1))
-                                .andExpect(jsonPath("$.data[0].username").value("jastiper_one"))
-                                .andExpect(jsonPath("$.data[0].role").value("JASTIPER"));
-        }
+        mockMvc.perform(get("/api/profile/jastiper")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Daftar jastiper berhasil diambil!"))
+                .andExpect(jsonPath("$.data.length()").value(1))
+                .andExpect(jsonPath("$.data[0].username").value("jastiper_one"))
+                .andExpect(jsonPath("$.data[0].role").value("JASTIPER"));
+    }
 
     @Test
     void shouldRejectUpdateMyProfileWithoutToken() throws Exception {
@@ -667,3 +667,7 @@ class ProfileControllerIntegrationTests {
         Assertions.assertEquals("PENDING", savedUser.getKycStatus());
     }
 }
+
+
+
+
