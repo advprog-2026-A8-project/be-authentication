@@ -208,6 +208,62 @@ class ProfileControllerIntegrationTests {
                 .andExpect(status().isForbidden());
     }
 
+    @Test
+    void shouldBulkLookupProfilesSuccessfully() throws Exception {
+        String token = registerAndLogin("bulk_one", "bulk_one@example.com", "password123");
+        registerAndLogin("bulk_two", "bulk_two@example.com", "password123");
+
+        Long firstId = userProfileRepository.findByEmail("bulk_one@example.com")
+                .orElseThrow(() -> new AssertionError("User bulk_one harus ada")).getId();
+        Long secondId = userProfileRepository.findByEmail("bulk_two@example.com")
+                .orElseThrow(() -> new AssertionError("User bulk_two harus ada")).getId();
+
+        Map<String, Object> request = Map.of(
+                "userIds", List.of(firstId, 999999L, secondId)
+        );
+
+        mockMvc.perform(post("/api/profile/lookup/bulk")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Bulk lookup profil berhasil!"))
+                .andExpect(jsonPath("$.data.users.length()").value(2))
+                .andExpect(jsonPath("$.data.users[0].id").value(firstId))
+                .andExpect(jsonPath("$.data.users[0].role").value("TITIPER"))
+                .andExpect(jsonPath("$.data.users[1].id").value(secondId))
+                .andExpect(jsonPath("$.data.notFoundIds.length()").value(1))
+                .andExpect(jsonPath("$.data.notFoundIds[0]").value(999999));
+    }
+
+    @Test
+    void shouldRejectBulkLookupWhenUserIdsEmpty() throws Exception {
+        String token = registerAndLogin("bulk_empty", "bulk_empty@example.com", "password123");
+
+        Map<String, Object> request = Map.of(
+                "userIds", List.of()
+        );
+
+        mockMvc.perform(post("/api/profile/lookup/bulk")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("userIds wajib diisi!"));
+    }
+
+    @Test
+    void shouldRejectBulkLookupWithoutToken() throws Exception {
+        Map<String, Object> request = Map.of(
+                "userIds", List.of(1L, 2L)
+        );
+
+        mockMvc.perform(post("/api/profile/lookup/bulk")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+    }
+
         @Test
         void shouldRejectGetJastiperProfilesWithoutToken() throws Exception {
                 mockMvc.perform(get("/api/profile/jastiper"))

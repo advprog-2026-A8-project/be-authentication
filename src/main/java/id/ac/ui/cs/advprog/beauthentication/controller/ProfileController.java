@@ -1,6 +1,8 @@
 package id.ac.ui.cs.advprog.beauthentication.controller;
 
 import id.ac.ui.cs.advprog.beauthentication.dto.ApiResponse;
+import id.ac.ui.cs.advprog.beauthentication.dto.BulkProfileLookupRequest;
+import id.ac.ui.cs.advprog.beauthentication.dto.BulkProfileLookupResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.KycSubmissionRequest;
 import id.ac.ui.cs.advprog.beauthentication.dto.KycSubmissionResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.ProfileResponse;
@@ -95,6 +97,19 @@ public class ProfileController {
             HttpStatus status = isNotFound(e.getMessage()) ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST;
             return ResponseEntity.status(status)
                     .body(new ApiResponse<>(e.getMessage(), null));
+        }
+    }
+
+    @PostMapping("/lookup/bulk")
+    public ResponseEntity<ApiResponse<BulkProfileLookupResponse>> bulkLookupProfile(
+            @RequestBody BulkProfileLookupRequest request
+    ) {
+        try {
+            List<Long> userIds = request == null ? null : request.getUserIds();
+            BulkProfileLookupResponse response = profileService.bulkLookupByIds(userIds);
+            return ResponseEntity.ok(new ApiResponse<>("Bulk lookup profil berhasil!", response));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>(e.getMessage(), null));
         }
     }
 

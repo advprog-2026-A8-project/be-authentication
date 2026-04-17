@@ -1,6 +1,8 @@
 package id.ac.ui.cs.advprog.beauthentication.service;
 
+import id.ac.ui.cs.advprog.beauthentication.dto.BulkProfileLookupResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.KycSubmissionRequest;
+import id.ac.ui.cs.advprog.beauthentication.dto.UserLookupSummaryResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.UpdateProfileRequest;
 import id.ac.ui.cs.advprog.beauthentication.model.KycStatus;
 import id.ac.ui.cs.advprog.beauthentication.model.UserRole;
@@ -9,7 +11,12 @@ import id.ac.ui.cs.advprog.beauthentication.repository.UserProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class ProfileService {
@@ -19,6 +26,16 @@ public class ProfileService {
 
     private boolean isBlank(String value) {
         return value == null || value.isBlank();
+    }
+
+    private UserLookupSummaryResponse toLookupSummary(UserProfile user) {
+        return new UserLookupSummaryResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getRole(),
+                user.getKycStatus()
+        );
     }
 
     private UserProfile getByPrincipal(String principalIdentifier) {
@@ -69,6 +86,34 @@ public class ProfileService {
 
     public List<UserProfile> getAllJastiperProfiles() {
         return repository.findAllByRole(UserRole.JASTIPER.name());
+    }
+
+    public BulkProfileLookupResponse bulkLookupByIds(List<Long> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            throw new IllegalArgumentException("userIds wajib diisi!");
+        }
+
+        if (userIds.stream().anyMatch(id -> id == null)) {
+            throw new IllegalArgumentException("userIds tidak boleh berisi null!");
+        }
+
+        LinkedHashSet<Long> uniqueIds = new LinkedHashSet<>(userIds);
+        Map<Long, UserProfile> profileMap = repository.findAllById(uniqueIds).stream()
+                .collect(Collectors.toMap(UserProfile::getId, Function.identity()));
+
+        List<UserLookupSummaryResponse> users = new ArrayList<>();
+        List<Long> notFoundIds = new ArrayList<>();
+
+        for (Long id : uniqueIds) {
+            UserProfile user = profileMap.get(id);
+            if (user == null) {
+                notFoundIds.add(id);
+            } else {
+                users.add(toLookupSummary(user));
+            }
+        }
+
+        return new BulkProfileLookupResponse(users, notFoundIds);
     }
 
     public UserProfile updateMyProfile(String principalIdentifier, UpdateProfileRequest request) {
