@@ -2,6 +2,7 @@ package id.ac.ui.cs.advprog.beauthentication.service;
 
 import id.ac.ui.cs.advprog.beauthentication.dto.BulkProfileLookupResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.KycSubmissionRequest;
+import id.ac.ui.cs.advprog.beauthentication.dto.RoleUpgradeResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.UserLookupSummaryResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.UpdateProfileRequest;
 import id.ac.ui.cs.advprog.beauthentication.model.KycStatus;
@@ -114,6 +115,30 @@ public class ProfileService {
         }
 
         return new BulkProfileLookupResponse(users, notFoundIds);
+    }
+
+    public RoleUpgradeResponse upgradeRoleToJastiper(Long userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("userId wajib diisi!");
+        }
+
+        UserProfile user = repository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Pengguna tidak ditemukan!"));
+
+        String oldRole = user.getRole();
+
+        if (UserRole.JASTIPER.name().equals(oldRole)) {
+            return new RoleUpgradeResponse(user.getId(), oldRole, user.getRole());
+        }
+
+        if (!UserRole.TITIPER.name().equals(oldRole)) {
+            throw new IllegalArgumentException("Hanya user TITIPER yang dapat di-upgrade ke JASTIPER!");
+        }
+
+        user.setRole(UserRole.JASTIPER.name());
+        UserProfile updated = repository.save(user);
+
+        return new RoleUpgradeResponse(updated.getId(), oldRole, updated.getRole());
     }
 
     public UserProfile updateMyProfile(String principalIdentifier, UpdateProfileRequest request) {

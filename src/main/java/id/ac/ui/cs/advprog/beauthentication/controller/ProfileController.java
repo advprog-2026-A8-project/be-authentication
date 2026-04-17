@@ -6,6 +6,8 @@ import id.ac.ui.cs.advprog.beauthentication.dto.BulkProfileLookupResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.KycSubmissionRequest;
 import id.ac.ui.cs.advprog.beauthentication.dto.KycSubmissionResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.ProfileResponse;
+import id.ac.ui.cs.advprog.beauthentication.dto.RoleUpgradeRequest;
+import id.ac.ui.cs.advprog.beauthentication.dto.RoleUpgradeResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.UpdateProfileRequest;
 import id.ac.ui.cs.advprog.beauthentication.model.UserProfile;
 import id.ac.ui.cs.advprog.beauthentication.repository.UserProfileRepository;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
@@ -110,6 +113,22 @@ public class ProfileController {
             return ResponseEntity.ok(new ApiResponse<>("Bulk lookup profil berhasil!", response));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(new ApiResponse<>(e.getMessage(), null));
+        }
+    }
+
+    @PutMapping("/admin/role/upgrade")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<RoleUpgradeResponse>> upgradeRoleToJastiper(
+            @RequestBody RoleUpgradeRequest request
+    ) {
+        try {
+            Long userId = request == null ? null : request.getUserId();
+            RoleUpgradeResponse response = profileService.upgradeRoleToJastiper(userId);
+            return ResponseEntity.ok(new ApiResponse<>("Role user berhasil di-upgrade ke JASTIPER!", response));
+        } catch (IllegalArgumentException e) {
+            HttpStatus status = isNotFound(e.getMessage()) ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST;
+            return ResponseEntity.status(status)
+                    .body(new ApiResponse<>(e.getMessage(), null));
         }
     }
 

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import id.ac.ui.cs.advprog.beauthentication.model.UserRole;
 import id.ac.ui.cs.advprog.beauthentication.model.UserProfile;
 import id.ac.ui.cs.advprog.beauthentication.repository.UserProfileRepository;
+import id.ac.ui.cs.advprog.beauthentication.utils.JwtUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,9 @@ class ProfileControllerIntegrationTests {
 
     @Autowired
     private UserProfileRepository userProfileRepository;
+
+        @Autowired
+        private JwtUtil jwtUtil;
 
     @BeforeEach
     void setUp() {
@@ -259,6 +263,59 @@ class ProfileControllerIntegrationTests {
         );
 
         mockMvc.perform(post("/api/profile/lookup/bulk")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void shouldAllowAdminToUpgradeRoleToJastiper() throws Exception {
+        registerAndLogin("upgrade_target", "upgrade_target@example.com", "password123");
+        Long targetUserId = userProfileRepository.findByEmail("upgrade_target@example.com")
+                .orElseThrow(() -> new AssertionError("User target harus ada")).getId();
+
+        String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+
+        Map<String, Object> request = Map.of("userId", targetUserId);
+
+        mockMvc.perform(put("/api/profile/admin/role/upgrade")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Role user berhasil di-upgrade ke JASTIPER!"))
+                .andExpect(jsonPath("$.data.userId").value(targetUserId))
+                .andExpect(jsonPath("$.data.oldRole").value("TITIPER"))
+                .andExpect(jsonPath("$.data.newRole").value("JASTIPER"));
+
+        UserProfile updated = userProfileRepository.findById(targetUserId)
+                .orElseThrow(() -> new AssertionError("User target harus tetap ada"));
+
+        Assertions.assertEquals(UserRole.JASTIPER.name(), updated.getRole());
+    }
+
+    @Test
+    void shouldRejectRoleUpgradeForNonAdmin() throws Exception {
+        registerAndLogin("upgrade_non_admin", "upgrade_non_admin@example.com", "password123");
+        Long targetUserId = userProfileRepository.findByEmail("upgrade_non_admin@example.com")
+                .orElseThrow(() -> new AssertionError("User target harus ada")).getId();
+
+        String nonAdminToken = jwtUtil.generateToken("titiper_test@example.com", "TITIPER");
+
+        Map<String, Object> request = Map.of("userId", targetUserId);
+
+        mockMvc.perform(put("/api/profile/admin/role/upgrade")
+                        .header("Authorization", "Bearer " + nonAdminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void shouldRejectRoleUpgradeWithoutToken() throws Exception {
+        Map<String, Object> request = Map.of("userId", 1L);
+
+        mockMvc.perform(put("/api/profile/admin/role/upgrade")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isForbidden());
