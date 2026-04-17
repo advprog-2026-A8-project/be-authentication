@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.core.Authentication;
 
@@ -79,6 +80,22 @@ public class ProfileController {
                 .map(this::toProfileResponse)
                 .toList();
         return ResponseEntity.ok(new ApiResponse<>("Daftar jastiper berhasil diambil!", profiles));
+    }
+
+    @GetMapping("/lookup")
+    public ResponseEntity<ApiResponse<ProfileResponse>> lookupProfile(
+            @RequestParam(required = false) Long id,
+            @RequestParam(required = false) String username,
+            @RequestParam(required = false) String email
+    ) {
+        try {
+            UserProfile user = profileService.getByIdentifier(id, username, email);
+            return ResponseEntity.ok(new ApiResponse<>("Profil berhasil ditemukan!", toProfileResponse(user)));
+        } catch (IllegalArgumentException e) {
+            HttpStatus status = isNotFound(e.getMessage()) ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST;
+            return ResponseEntity.status(status)
+                    .body(new ApiResponse<>(e.getMessage(), null));
+        }
     }
 
     @GetMapping("/me")

@@ -167,6 +167,47 @@ class ProfileControllerIntegrationTests {
                 .andExpect(status().isForbidden());
     }
 
+    @Test
+    void shouldLookupProfileByEmailSuccessfully() throws Exception {
+        String token = registerAndLogin("lookup_user", "lookup_user@example.com", "password123");
+
+        mockMvc.perform(get("/api/profile/lookup")
+                        .header("Authorization", "Bearer " + token)
+                        .param("email", "lookup_user@example.com"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Profil berhasil ditemukan!"))
+                .andExpect(jsonPath("$.data.username").value("lookup_user"))
+                .andExpect(jsonPath("$.data.email").value("lookup_user@example.com"));
+    }
+
+    @Test
+    void shouldRejectLookupProfileWithoutIdentifier() throws Exception {
+        String token = registerAndLogin("lookup_req_user", "lookup_req_user@example.com", "password123");
+
+        mockMvc.perform(get("/api/profile/lookup")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Salah satu identifier id, username, atau email wajib diisi!"));
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenLookupProfileDoesNotExist() throws Exception {
+        String token = registerAndLogin("lookup_nf_user", "lookup_nf_user@example.com", "password123");
+
+        mockMvc.perform(get("/api/profile/lookup")
+                        .header("Authorization", "Bearer " + token)
+                        .param("username", "pengguna_tidak_ada"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Pengguna tidak ditemukan!"));
+    }
+
+    @Test
+    void shouldRejectLookupProfileWithoutToken() throws Exception {
+        mockMvc.perform(get("/api/profile/lookup")
+                        .param("email", "someone@example.com"))
+                .andExpect(status().isForbidden());
+    }
+
         @Test
         void shouldRejectGetJastiperProfilesWithoutToken() throws Exception {
                 mockMvc.perform(get("/api/profile/jastiper"))

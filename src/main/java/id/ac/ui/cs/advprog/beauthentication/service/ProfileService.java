@@ -31,6 +31,42 @@ public class ProfileService {
         return getByPrincipal(username);
     }
 
+    public UserProfile getByIdentifier(Long id, String username, String email) {
+        int providedCount = 0;
+
+        if (id != null) {
+            providedCount++;
+        }
+        if (!isBlank(username)) {
+            providedCount++;
+        }
+        if (!isBlank(email)) {
+            providedCount++;
+        }
+
+        if (providedCount == 0) {
+            throw new IllegalArgumentException("Salah satu identifier id, username, atau email wajib diisi!");
+        }
+
+        if (providedCount > 1) {
+            throw new IllegalArgumentException("Gunakan tepat satu identifier: id, username, atau email.");
+        }
+
+        if (id != null) {
+            return repository.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Pengguna tidak ditemukan!"));
+        }
+
+        if (!isBlank(username)) {
+            return repository.findByUsername(username.trim())
+                    .orElseThrow(() -> new IllegalArgumentException("Pengguna tidak ditemukan!"));
+        }
+
+        String normalizedEmail = email.trim().toLowerCase();
+        return repository.findByEmail(normalizedEmail)
+                .orElseThrow(() -> new IllegalArgumentException("Pengguna tidak ditemukan!"));
+    }
+
     public List<UserProfile> getAllJastiperProfiles() {
         return repository.findAllByRole(UserRole.JASTIPER.name());
     }
