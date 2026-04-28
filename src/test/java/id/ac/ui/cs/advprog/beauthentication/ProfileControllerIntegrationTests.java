@@ -412,7 +412,8 @@ class ProfileControllerIntegrationTests {
                         .header("Authorization", "Bearer " + nonAdminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.message").value("Akses ditolak!"));
     }
 
     @Test
