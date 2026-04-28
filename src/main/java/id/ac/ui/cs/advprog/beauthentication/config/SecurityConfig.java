@@ -21,6 +21,12 @@ public class SecurityConfig {
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
+    @Autowired
+    private RestAuthenticationEntryPoint restAuthenticationEntryPoint;
+
+    @Autowired
+    private RestAccessDeniedHandler restAccessDeniedHandler;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -33,6 +39,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/register", "/api/auth/login").permitAll() // Hanya register dan login yang public
                         .anyRequest().authenticated() // Kunci endpoint lainnya (harus pakai token)
+                )
+                .exceptionHandling(exceptions -> exceptions
+                    .authenticationEntryPoint(restAuthenticationEntryPoint)
+                    .accessDeniedHandler(restAccessDeniedHandler)
                 )
                 // Ubah session menjadi STATELESS karena kita pakai token (tidak butuh session/cookies dari server)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

@@ -54,7 +54,8 @@ class AuthSecurityIntegrationTests {
     @Test
     void shouldRejectProtectedEndpointWithoutToken() throws Exception {
         mockMvc.perform(get("/api/profile/all"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("Autentikasi diperlukan!"));
     }
 
     @Test
@@ -72,7 +73,8 @@ class AuthSecurityIntegrationTests {
     void shouldRejectProtectedEndpointWithInvalidJwt() throws Exception {
         mockMvc.perform(get("/api/profile/all")
                         .header("Authorization", "Bearer invalid.token.value"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("Autentikasi diperlukan!"));
     }
 
     @Test
@@ -88,13 +90,15 @@ class AuthSecurityIntegrationTests {
     void shouldRejectJastiperEndpointWithInvalidJwt() throws Exception {
         mockMvc.perform(get("/api/profile/jastiper")
                         .header("Authorization", "Bearer invalid.token.value"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("Autentikasi diperlukan!"));
     }
 
     @Test
     void shouldRejectVerifyEndpointWithoutToken() throws Exception {
         mockMvc.perform(get("/api/auth/verify"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("Autentikasi diperlukan!"));
     }
 
     @Test
@@ -114,7 +118,8 @@ class AuthSecurityIntegrationTests {
     void shouldRejectVerifyEndpointWithInvalidJwt() throws Exception {
         mockMvc.perform(get("/api/auth/verify")
                         .header("Authorization", "Bearer invalid.token.value"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("Autentikasi diperlukan!"));
     }
 
     @Test
@@ -125,6 +130,7 @@ class AuthSecurityIntegrationTests {
                         .header("Authorization", "Bearer " + legacyTokenWithoutRole)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"userId\":1}"))
-                .andExpect(status().isForbidden());
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.message").value("Akses ditolak!"));
     }
 }
