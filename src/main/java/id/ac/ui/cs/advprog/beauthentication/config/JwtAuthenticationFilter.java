@@ -46,9 +46,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String username = jwtUtil.extractUsername(token);
                 String role = jwtUtil.extractRole(token);
 
+                List<SimpleGrantedAuthority> authorities = toAuthorities(role);
+                if (authorities.isEmpty()) {
+                    chain.doFilter(request, response);
+                    return;
+                }
+
                 // Beri tahu Spring Security bahwa pengguna ini sudah sah (terautentikasi)
                 UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(username, null, toAuthorities(role));
+                        new UsernamePasswordAuthenticationToken(username, null, authorities);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         }

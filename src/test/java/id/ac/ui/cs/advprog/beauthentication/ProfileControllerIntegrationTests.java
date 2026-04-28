@@ -168,7 +168,8 @@ class ProfileControllerIntegrationTests {
     @Test
     void shouldRejectGetMyProfileWithoutToken() throws Exception {
         mockMvc.perform(get("/api/profile/me"))
-                .andExpect(status().isForbidden());
+                                .andExpect(status().isUnauthorized())
+                                .andExpect(jsonPath("$.message").value("Autentikasi diperlukan!"));
     }
 
     @Test
@@ -250,7 +251,8 @@ class ProfileControllerIntegrationTests {
     void shouldRejectLookupProfileWithoutToken() throws Exception {
         mockMvc.perform(get("/api/profile/lookup")
                         .param("email", "someone@example.com"))
-                .andExpect(status().isForbidden());
+                                .andExpect(status().isUnauthorized())
+                                .andExpect(jsonPath("$.message").value("Autentikasi diperlukan!"));
     }
 
     @Test
@@ -318,7 +320,8 @@ class ProfileControllerIntegrationTests {
         mockMvc.perform(post("/api/profile/lookup/bulk")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("Autentikasi diperlukan!"));
     }
 
     @Test
@@ -419,13 +422,15 @@ class ProfileControllerIntegrationTests {
         mockMvc.perform(put("/api/profile/admin/role/upgrade")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("Autentikasi diperlukan!"));
     }
 
         @Test
         void shouldRejectGetJastiperProfilesWithoutToken() throws Exception {
                 mockMvc.perform(get("/api/profile/jastiper"))
-                                .andExpect(status().isForbidden());
+                                .andExpect(status().isUnauthorized())
+                                .andExpect(jsonPath("$.message").value("Autentikasi diperlukan!"));
         }
 
     @Test
@@ -466,7 +471,8 @@ class ProfileControllerIntegrationTests {
         mockMvc.perform(put("/api/profile/me")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateRequest)))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("Autentikasi diperlukan!"));
     }
 
     @Test
@@ -520,7 +526,8 @@ class ProfileControllerIntegrationTests {
         mockMvc.perform(post("/api/profile/kyc/submit")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(kycRequest)))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("Autentikasi diperlukan!"));
     }
 
     @Test

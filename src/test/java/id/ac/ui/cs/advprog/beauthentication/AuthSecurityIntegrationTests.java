@@ -130,7 +130,7 @@ class AuthSecurityIntegrationTests {
                         .header("Authorization", "Bearer " + legacyTokenWithoutRole)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"userId\":1}"))
-            .andExpect(status().isForbidden())
-            .andExpect(jsonPath("$.message").value("Akses ditolak!"));
+            .andExpect(status().isUnauthorized())
+            .andExpect(jsonPath("$.message").value("Autentikasi diperlukan!"));
     }
 }
