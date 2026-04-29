@@ -180,6 +180,34 @@ class ProfileControllerIntegrationTests {
     }
 
     @Test
+    void shouldAllowUpdateWithoutFullNameWhenAlreadySet() throws Exception {
+        String token = registerAndLogin("full_name_set", "full_name_set@example.com", "password123");
+
+        Map<String, String> initialUpdate = Map.of(
+                "fullName", "Nama Awal"
+        );
+
+        mockMvc.perform(put("/api/profile/me")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(initialUpdate)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.fullName").value("Nama Awal"));
+
+        Map<String, String> secondUpdate = Map.of(
+                "phoneNumber", "08000000000"
+        );
+
+        mockMvc.perform(put("/api/profile/me")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(secondUpdate)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.fullName").value("Nama Awal"))
+                .andExpect(jsonPath("$.data.phoneNumber").value("08000000000"));
+    }
+
+    @Test
     void shouldRejectProfileUpdateWhenUsernameAlreadyUsed() throws Exception {
         registerAndLogin("first_user", "first_user@example.com", "password123");
         String secondToken = registerAndLogin("second_user", "second_user@example.com", "password123");

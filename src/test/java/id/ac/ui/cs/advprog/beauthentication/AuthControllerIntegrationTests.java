@@ -193,6 +193,32 @@ class AuthControllerIntegrationTests {
     }
 
     @Test
+    void shouldRejectDuplicateRegisterByEmailIgnoringCase() throws Exception {
+        Map<String, String> firstRegister = Map.of(
+                "username", "case_user_one",
+                "email", "CaseEmail@Example.com",
+                "password", "password123"
+        );
+
+        Map<String, String> secondRegister = Map.of(
+                "username", "case_user_two",
+                "email", "caseemail@example.com",
+                "password", "password123"
+        );
+
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(firstRegister)))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(secondRegister)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Username atau Email sudah terdaftar!"));
+    }
+
+    @Test
     void shouldRejectRegisterWithInvalidEmailFormat() throws Exception {
         Map<String, String> registerRequest = Map.of(
                 "email", "invalid-email-format",
