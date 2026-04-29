@@ -110,6 +110,44 @@ class ProfileControllerIntegrationTests {
     }
 
     @Test
+    void shouldSubmitKycSuccessfully() throws Exception {
+        String token = registerAndLogin("kyc_user", "kyc_user@example.com", "password123");
+
+        Map<String, String> request = Map.of(
+                "fullName", "Budi Santoso",
+                "identityDocumentUrl", "https://example.com/ktp-budi.png",
+                "socialMediaUrl", "https://instagram.com/budi"
+        );
+
+        mockMvc.perform(post("/api/profile/kyc/submit")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Pengajuan KYC berhasil dikirim!"))
+                .andExpect(jsonPath("$.data.fullName").value("Budi Santoso"))
+                .andExpect(jsonPath("$.data.identityDocumentUrl").value("https://example.com/ktp-budi.png"))
+                .andExpect(jsonPath("$.data.socialMediaUrl").value("https://instagram.com/budi"))
+                .andExpect(jsonPath("$.data.kycStatus").value("PENDING"));
+    }
+
+    @Test
+    void shouldRejectKycSubmissionWhenFieldsMissing() throws Exception {
+        String token = registerAndLogin("kyc_missing", "kyc_missing@example.com", "password123");
+
+        Map<String, String> request = Map.of(
+                "fullName", "Budi Santoso"
+        );
+
+        mockMvc.perform(post("/api/profile/kyc/submit")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("fullName, identityDocumentUrl, dan socialMediaUrl wajib diisi!"));
+    }
+
+    @Test
     void shouldRejectProfileUpdateWhenUsernameAlreadyUsed() throws Exception {
         registerAndLogin("first_user", "first_user@example.com", "password123");
         String secondToken = registerAndLogin("second_user", "second_user@example.com", "password123");

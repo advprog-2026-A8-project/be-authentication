@@ -59,6 +59,15 @@ class AuthSecurityIntegrationTests {
     }
 
     @Test
+    void shouldRejectKycSubmissionWithoutToken() throws Exception {
+        mockMvc.perform(post("/api/profile/kyc/submit")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"fullName\":\"Budi\",\"identityDocumentUrl\":\"doc\",\"socialMediaUrl\":\"ig\"}"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("Autentikasi diperlukan!"));
+    }
+
+    @Test
     void shouldAllowProtectedEndpointWithValidJwt() throws Exception {
         String token = jwtUtil.generateToken("asdos_reviewer", "ADMIN");
 
