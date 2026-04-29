@@ -1,6 +1,7 @@
 package id.ac.ui.cs.advprog.beauthentication;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import id.ac.ui.cs.advprog.beauthentication.model.AccountStatus;
 import id.ac.ui.cs.advprog.beauthentication.model.UserRole;
 import id.ac.ui.cs.advprog.beauthentication.model.UserProfile;
 import id.ac.ui.cs.advprog.beauthentication.repository.UserProfileRepository;
@@ -522,6 +523,144 @@ class ProfileControllerIntegrationTests {
         Map<String, Object> request = Map.of("userId", 1L);
 
         mockMvc.perform(put("/api/profile/admin/role/upgrade")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("Autentikasi diperlukan!"));
+    }
+
+    @Test
+    void shouldAllowAdminToGetAllUsers() throws Exception {
+        UserProfile userOne = new UserProfile();
+        userOne.setUsername("admin_list_one");
+        userOne.setEmail("admin_list_one@example.com");
+        userOne.setPassword("dummy");
+        userOne.setRole(UserRole.TITIPER.name());
+        userOne.setAccountStatus(AccountStatus.ACTIVE.name());
+        userOne.setKycStatus("PENDING");
+
+        UserProfile userTwo = new UserProfile();
+        userTwo.setUsername("admin_list_two");
+        userTwo.setEmail("admin_list_two@example.com");
+        userTwo.setPassword("dummy");
+        userTwo.setRole(UserRole.JASTIPER.name());
+        userTwo.setAccountStatus(AccountStatus.ACTIVE.name());
+        userTwo.setKycStatus("APPROVED");
+
+        userProfileRepository.saveAll(List.of(userOne, userTwo));
+
+        String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+
+        mockMvc.perform(get("/api/profile/admin/users")
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Daftar profil berhasil diambil!"))
+                .andExpect(jsonPath("$.data.length()").value(2));
+    }
+
+    @Test
+    void shouldRejectAdminUsersForNonAdmin() throws Exception {
+        String token = jwtUtil.generateToken("titiper_test@example.com", "TITIPER");
+
+        mockMvc.perform(get("/api/profile/admin/users")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.message").value("Akses ditolak!"));
+    }
+
+    @Test
+    void shouldRejectAdminUsersWithoutToken() throws Exception {
+        mockMvc.perform(get("/api/profile/admin/users"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("Autentikasi diperlukan!"));
+    }
+
+    @Test
+    void shouldAllowAdminToUpdateAccountStatus() throws Exception {
+        UserProfile target = new UserProfile();
+        target.setUsername("status_target");
+        target.setEmail("status_target@example.com");
+        target.setPassword("dummy");
+        target.setRole(UserRole.TITIPER.name());
+        target.setAccountStatus(AccountStatus.ACTIVE.name());
+        target.setKycStatus("PENDING");
+        UserProfile saved = userProfileRepository.save(target);
+
+        String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+        Map<String, Object> request = Map.of(
+                "userId", saved.getId(),
+                "status", "BANNED"
+        );
+
+        mockMvc.perform(put("/api/profile/admin/status")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Status akun berhasil diperbarui!"))
+                .andExpect(jsonPath("$.data.userId").value(saved.getId()))
+                .andExpect(jsonPath("$.data.oldStatus").value("ACTIVE"))
+                .andExpect(jsonPath("$.data.newStatus").value("BANNED"));
+
+        UserProfile updated = userProfileRepository.findById(saved.getId())
+                .orElseThrow(() -> new AssertionError("User target harus tetap ada"));
+        Assertions.assertEquals(AccountStatus.BANNED.name(), updated.getAccountStatus());
+    }
+
+    @Test
+    void shouldRejectAccountStatusUpdateWithInvalidStatus() throws Exception {
+        String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+
+        Map<String, Object> request = Map.of(
+                "userId", 1L,
+                "status", "PENDING"
+        );
+
+        mockMvc.perform(put("/api/profile/admin/status")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("status tidak valid!"));
+    }
+
+    @Test
+    void shouldRejectAccountStatusUpdateWhenUserIdMissing() throws Exception {
+        String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+
+        mockMvc.perform(put("/api/profile/admin/status")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("userId wajib diisi!"));
+    }
+
+    @Test
+    void shouldRejectAccountStatusUpdateForNonAdmin() throws Exception {
+        String token = jwtUtil.generateToken("titiper_test@example.com", "TITIPER");
+
+        Map<String, Object> request = Map.of(
+                "userId", 1L,
+                "status", "BANNED"
+        );
+
+        mockMvc.perform(put("/api/profile/admin/status")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.message").value("Akses ditolak!"));
+    }
+
+    @Test
+    void shouldRejectAccountStatusUpdateWithoutToken() throws Exception {
+        Map<String, Object> request = Map.of(
+                "userId", 1L,
+                "status", "BANNED"
+        );
+
+        mockMvc.perform(put("/api/profile/admin/status")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized())

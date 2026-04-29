@@ -1,10 +1,12 @@
 package id.ac.ui.cs.advprog.beauthentication.service;
 
+import id.ac.ui.cs.advprog.beauthentication.dto.AccountStatusUpdateResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.BulkProfileLookupResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.KycSubmissionRequest;
 import id.ac.ui.cs.advprog.beauthentication.dto.RoleUpgradeResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.UserLookupSummaryResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.UpdateProfileRequest;
+import id.ac.ui.cs.advprog.beauthentication.model.AccountStatus;
 import id.ac.ui.cs.advprog.beauthentication.model.KycStatus;
 import id.ac.ui.cs.advprog.beauthentication.model.UserRole;
 import id.ac.ui.cs.advprog.beauthentication.model.UserProfile;
@@ -16,6 +18,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -89,6 +92,10 @@ public class ProfileService {
         return repository.findAllByRole(UserRole.JASTIPER.name());
     }
 
+    public List<UserProfile> getAllProfiles() {
+        return repository.findAll();
+    }
+
     public BulkProfileLookupResponse bulkLookupByIds(List<Long> userIds) {
         if (userIds == null || userIds.isEmpty()) {
             throw new IllegalArgumentException("userIds wajib diisi!");
@@ -139,6 +146,41 @@ public class ProfileService {
         UserProfile updated = repository.save(user);
 
         return new RoleUpgradeResponse(updated.getId(), oldRole, updated.getRole());
+    }
+
+    public AccountStatusUpdateResponse updateAccountStatus(Long userId, String status) {
+        if (userId == null) {
+            throw new IllegalArgumentException("userId wajib diisi!");
+        }
+
+        if (isBlank(status)) {
+            throw new IllegalArgumentException("status wajib diisi!");
+        }
+
+        String normalizedStatus = status.trim().toUpperCase(Locale.ROOT);
+        AccountStatus targetStatus;
+
+        try {
+            targetStatus = AccountStatus.valueOf(normalizedStatus);
+        } catch (IllegalArgumentException ex) {
+            throw new IllegalArgumentException("status tidak valid!");
+        }
+
+        if (AccountStatus.PENDING == targetStatus) {
+            throw new IllegalArgumentException("status tidak valid!");
+        }
+
+        UserProfile user = repository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Pengguna tidak ditemukan!"));
+
+        String oldStatus = user.getAccountStatus();
+
+        if (!targetStatus.name().equalsIgnoreCase(oldStatus)) {
+            user.setAccountStatus(targetStatus.name());
+            user = repository.save(user);
+        }
+
+        return new AccountStatusUpdateResponse(user.getId(), oldStatus, user.getAccountStatus());
     }
 
     public UserProfile updateMyProfile(String principalIdentifier, UpdateProfileRequest request) {

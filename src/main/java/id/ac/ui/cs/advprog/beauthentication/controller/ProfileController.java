@@ -1,5 +1,7 @@
 package id.ac.ui.cs.advprog.beauthentication.controller;
 
+import id.ac.ui.cs.advprog.beauthentication.dto.AccountStatusUpdateRequest;
+import id.ac.ui.cs.advprog.beauthentication.dto.AccountStatusUpdateResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.ApiResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.BulkProfileLookupRequest;
 import id.ac.ui.cs.advprog.beauthentication.dto.BulkProfileLookupResponse;
@@ -80,6 +82,15 @@ public class ProfileController {
         return ResponseEntity.ok(new ApiResponse<>("Daftar profil berhasil diambil!", profiles));
     }
 
+    @GetMapping("/admin/users")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<List<ProfileResponse>>> getAllProfilesForAdmin() {
+        List<ProfileResponse> profiles = profileService.getAllProfiles().stream()
+                .map(this::toProfileResponse)
+                .toList();
+        return ResponseEntity.ok(new ApiResponse<>("Daftar profil berhasil diambil!", profiles));
+    }
+
     @GetMapping("/jastiper")
     public ResponseEntity<ApiResponse<List<ProfileResponse>>> getAllJastiperProfiles() {
         List<ProfileResponse> profiles = profileService.getAllJastiperProfiles().stream()
@@ -126,6 +137,23 @@ public class ProfileController {
             Long userId = request == null ? null : request.getUserId();
             RoleUpgradeResponse response = profileService.upgradeRoleToJastiper(userId);
             return ResponseEntity.ok(new ApiResponse<>("Role user berhasil di-upgrade ke JASTIPER!", response));
+        } catch (IllegalArgumentException e) {
+            HttpStatus status = isNotFound(e.getMessage()) ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST;
+            return ResponseEntity.status(status)
+                    .body(new ApiResponse<>(e.getMessage(), null));
+        }
+    }
+
+    @PutMapping("/admin/status")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<AccountStatusUpdateResponse>> updateAccountStatus(
+            @RequestBody AccountStatusUpdateRequest request
+    ) {
+        try {
+            Long userId = request == null ? null : request.getUserId();
+            String status = request == null ? null : request.getStatus();
+            AccountStatusUpdateResponse response = profileService.updateAccountStatus(userId, status);
+            return ResponseEntity.ok(new ApiResponse<>("Status akun berhasil diperbarui!", response));
         } catch (IllegalArgumentException e) {
             HttpStatus status = isNotFound(e.getMessage()) ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST;
             return ResponseEntity.status(status)
