@@ -46,6 +46,7 @@ public class ProfileController {
                 user.getPhoneNumber(),
                 user.getBio(),
                 user.getRole(),
+                user.getAccountStatus(),
                 user.getKycStatus()
         );
     }

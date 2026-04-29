@@ -1,7 +1,13 @@
 package id.ac.ui.cs.advprog.beauthentication;
 
+import id.ac.ui.cs.advprog.beauthentication.model.AccountStatus;
+import id.ac.ui.cs.advprog.beauthentication.model.KycStatus;
+import id.ac.ui.cs.advprog.beauthentication.model.UserProfile;
+import id.ac.ui.cs.advprog.beauthentication.model.UserRole;
+import id.ac.ui.cs.advprog.beauthentication.repository.UserProfileRepository;
 import id.ac.ui.cs.advprog.beauthentication.utils.JwtUtil;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -24,6 +30,14 @@ class AuthSecurityIntegrationTests {
 
     @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    private UserProfileRepository userProfileRepository;
+
+    @BeforeEach
+    void setUp() {
+        userProfileRepository.deleteAll();
+    }
 
     @Test
     void shouldAllowRegisterEndpointWithoutToken() throws Exception {
@@ -142,4 +156,29 @@ class AuthSecurityIntegrationTests {
             .andExpect(status().isUnauthorized())
             .andExpect(jsonPath("$.message").value("Autentikasi diperlukan!"));
     }
+
+            @Test
+            void shouldBlockBannedUserFromProtectedEndpointsButAllowVerify() throws Exception {
+            UserProfile bannedUser = new UserProfile();
+            bannedUser.setUsername("banned_user");
+            bannedUser.setEmail("banned_user@example.com");
+            bannedUser.setPassword("dummy");
+            bannedUser.setRole(UserRole.TITIPER.name());
+            bannedUser.setAccountStatus(AccountStatus.BANNED.name());
+            bannedUser.setKycStatus(KycStatus.PENDING.name());
+            userProfileRepository.save(bannedUser);
+
+            String token = jwtUtil.generateToken("banned_user@example.com", "TITIPER");
+
+            mockMvc.perform(get("/api/profile/all")
+                    .header("Authorization", "Bearer " + token))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("Autentikasi diperlukan!"));
+
+            mockMvc.perform(get("/api/auth/verify")
+                    .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Token valid!"))
+                .andExpect(jsonPath("$.data.subject").value("banned_user@example.com"));
+            }
 }

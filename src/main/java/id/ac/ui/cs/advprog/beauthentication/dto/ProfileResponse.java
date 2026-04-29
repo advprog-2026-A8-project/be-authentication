@@ -13,5 +13,6 @@ public class ProfileResponse {
     private String phoneNumber;
     private String bio;
     private String role;
+    private String accountStatus;
     private String kycStatus;
 }

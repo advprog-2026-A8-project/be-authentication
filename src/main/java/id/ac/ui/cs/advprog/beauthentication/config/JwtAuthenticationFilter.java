@@ -1,5 +1,8 @@
 package id.ac.ui.cs.advprog.beauthentication.config;
 
+import id.ac.ui.cs.advprog.beauthentication.model.AccountStatus;
+import id.ac.ui.cs.advprog.beauthentication.model.UserProfile;
+import id.ac.ui.cs.advprog.beauthentication.repository.UserProfileRepository;
 import id.ac.ui.cs.advprog.beauthentication.utils.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -16,12 +19,16 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    private UserProfileRepository userProfileRepository;
 
     private List<SimpleGrantedAuthority> toAuthorities(String role) {
         if (role == null || role.isBlank()) {
@@ -30,6 +37,32 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String normalized = role.trim().toUpperCase(Locale.ROOT);
         return List.of(new SimpleGrantedAuthority("ROLE_" + normalized));
+    }
+
+    private boolean isVerifyEndpoint(HttpServletRequest request) {
+        return "/api/auth/verify".equals(request.getRequestURI());
+    }
+
+    private Optional<UserProfile> findUserBySubject(String subject) {
+        if (subject == null || subject.isBlank()) {
+            return Optional.empty();
+        }
+
+        String trimmed = subject.trim();
+        Optional<UserProfile> byUsername = userProfileRepository.findByUsername(trimmed);
+        if (byUsername.isPresent()) {
+            return byUsername;
+        }
+
+        String normalizedEmail = trimmed.toLowerCase(Locale.ROOT);
+        return userProfileRepository.findByEmail(normalizedEmail);
+    }
+
+    private boolean isBannedUser(String subject) {
+        return findUserBySubject(subject)
+                .map(UserProfile::getAccountStatus)
+                .map(status -> AccountStatus.BANNED.name().equalsIgnoreCase(status))
+                .orElse(false);
     }
 
     @Override
@@ -48,6 +81,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 List<SimpleGrantedAuthority> authorities = toAuthorities(role);
                 if (authorities.isEmpty()) {
+                    chain.doFilter(request, response);
+                    return;
+                }
+
+                if (!isVerifyEndpoint(request) && isBannedUser(username)) {
                     chain.doFilter(request, response);
                     return;
                 }

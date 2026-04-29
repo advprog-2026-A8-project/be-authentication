@@ -40,6 +40,9 @@ public class UserProfile {
     private String role;
 
     @Column(nullable = false)
+    private String accountStatus = AccountStatus.ACTIVE.name();
+
+    @Column(nullable = false)
     private String kycStatus = "PENDING";
 
     @Column(name = "kyc_identity_document_url")

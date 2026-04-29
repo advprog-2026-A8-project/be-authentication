@@ -2,6 +2,7 @@ package id.ac.ui.cs.advprog.beauthentication.service;
 
 import id.ac.ui.cs.advprog.beauthentication.dto.LoginRequest;
 import id.ac.ui.cs.advprog.beauthentication.dto.RegisterRequest;
+import id.ac.ui.cs.advprog.beauthentication.model.AccountStatus;
 import id.ac.ui.cs.advprog.beauthentication.model.KycStatus;
 import id.ac.ui.cs.advprog.beauthentication.model.UserProfile;
 import id.ac.ui.cs.advprog.beauthentication.model.UserRole;
@@ -85,6 +86,7 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         user.setRole(UserRole.TITIPER.name());
+        user.setAccountStatus(AccountStatus.ACTIVE.name());
         user.setKycStatus(KycStatus.PENDING.name());
 
         return repository.save(user);

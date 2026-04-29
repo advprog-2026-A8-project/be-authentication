@@ -1,5 +1,6 @@
 package id.ac.ui.cs.advprog.beauthentication.config;
 
+import id.ac.ui.cs.advprog.beauthentication.model.AccountStatus;
 import id.ac.ui.cs.advprog.beauthentication.model.KycStatus;
 import id.ac.ui.cs.advprog.beauthentication.model.UserProfile;
 import id.ac.ui.cs.advprog.beauthentication.model.UserRole;
@@ -28,6 +29,7 @@ public class DataSeeder implements CommandLineRunner {
             user1.setEmail("naufal@example.com");
             user1.setPassword(passwordEncoder.encode("password123"));
             user1.setRole(UserRole.JASTIPER.name());
+            user1.setAccountStatus(AccountStatus.ACTIVE.name());
             user1.setKycStatus(KycStatus.PENDING.name());
 
             UserProfile user2 = new UserProfile();
@@ -35,6 +37,7 @@ public class DataSeeder implements CommandLineRunner {
             user2.setEmail("asdos@example.com");
             user2.setPassword(passwordEncoder.encode("admin123"));
             user2.setRole(UserRole.ADMIN.name());
+            user2.setAccountStatus(AccountStatus.ACTIVE.name());
             user2.setKycStatus(KycStatus.APPROVED.name());
 
             repository.saveAll(List.of(user1, user2));
