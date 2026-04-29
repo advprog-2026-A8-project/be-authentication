@@ -109,8 +109,8 @@ class ProfileControllerIntegrationTests {
                 .andExpect(jsonPath("$.data.bio").value("Bio baru"));
     }
 
-    @Test
-    void shouldSubmitKycSuccessfully() throws Exception {
+        @Test
+        void shouldSubmitKycSuccessfullyWithBasicData() throws Exception {
         String token = registerAndLogin("kyc_user", "kyc_user@example.com", "password123");
 
         Map<String, String> request = Map.of(
@@ -148,12 +148,45 @@ class ProfileControllerIntegrationTests {
     }
 
     @Test
+    void shouldRejectUpdateProfileWhenFullNameBlank() throws Exception {
+        String token = registerAndLogin("blank_fullname", "blank_fullname@example.com", "password123");
+
+        Map<String, String> updateRequest = Map.of(
+                "fullName", "   "
+        );
+
+        mockMvc.perform(put("/api/profile/me")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("fullName wajib diisi!"));
+    }
+
+    @Test
+    void shouldRejectUpdateProfileWhenFullNameMissingAndNotSet() throws Exception {
+        String token = registerAndLogin("missing_fullname", "missing_fullname@example.com", "password123");
+
+        Map<String, String> updateRequest = Map.of(
+                "phoneNumber", "08123456789"
+        );
+
+        mockMvc.perform(put("/api/profile/me")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("fullName wajib diisi!"));
+    }
+
+    @Test
     void shouldRejectProfileUpdateWhenUsernameAlreadyUsed() throws Exception {
         registerAndLogin("first_user", "first_user@example.com", "password123");
         String secondToken = registerAndLogin("second_user", "second_user@example.com", "password123");
 
         Map<String, String> updateRequest = Map.of(
-                "username", "first_user"
+                "username", "first_user",
+                "fullName", "Second User"
         );
 
         mockMvc.perform(put("/api/profile/me")
@@ -187,7 +220,8 @@ class ProfileControllerIntegrationTests {
         String token = registerAndLogin("token_stable_user", "token_stable_user@example.com", "password123");
 
         Map<String, String> updateRequest = Map.of(
-                "username", "token_stable_user_updated"
+                "username", "token_stable_user_updated",
+                "fullName", "Token Stable User"
         );
 
         mockMvc.perform(put("/api/profile/me")
@@ -195,7 +229,8 @@ class ProfileControllerIntegrationTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.username").value("token_stable_user_updated"));
+                .andExpect(jsonPath("$.data.username").value("token_stable_user_updated"))
+                .andExpect(jsonPath("$.data.fullName").value("Token Stable User"));
 
         mockMvc.perform(get("/api/profile/me")
                         .header("Authorization", "Bearer " + token))

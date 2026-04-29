@@ -159,7 +159,13 @@ public class ProfileService {
         }
 
         if (request.getFullName() != null) {
-            currentUser.setFullName(request.getFullName().trim());
+            String trimmedFullName = request.getFullName().trim();
+            if (trimmedFullName.isBlank()) {
+                throw new IllegalArgumentException("fullName wajib diisi!");
+            }
+            currentUser.setFullName(trimmedFullName);
+        } else if (isBlank(currentUser.getFullName())) {
+            throw new IllegalArgumentException("fullName wajib diisi!");
         }
 
         if (request.getPhoneNumber() != null) {
