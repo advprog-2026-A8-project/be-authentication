@@ -453,6 +453,123 @@ class ProfileControllerIntegrationTests {
     }
 
     @Test
+    void shouldAllowAdminToApproveKycAndUpgradeRole() throws Exception {
+        UserProfile target = new UserProfile();
+        target.setUsername("kyc_approve_target");
+        target.setEmail("kyc_approve_target@example.com");
+        target.setPassword("dummy");
+        target.setRole(UserRole.TITIPER.name());
+        target.setKycStatus("PENDING");
+        UserProfile saved = userProfileRepository.save(target);
+
+        String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+        Map<String, Object> request = Map.of(
+                "userId", saved.getId(),
+                "decision", "APPROVE"
+        );
+
+        mockMvc.perform(put("/api/profile/admin/kyc/decision")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Keputusan KYC berhasil diproses!"))
+                .andExpect(jsonPath("$.data.userId").value(saved.getId()))
+                .andExpect(jsonPath("$.data.oldKycStatus").value("PENDING"))
+                .andExpect(jsonPath("$.data.newKycStatus").value("APPROVED"))
+                .andExpect(jsonPath("$.data.oldRole").value("TITIPER"))
+                .andExpect(jsonPath("$.data.newRole").value("JASTIPER"));
+
+        UserProfile updated = userProfileRepository.findById(saved.getId())
+                .orElseThrow(() -> new AssertionError("User target harus tetap ada"));
+        Assertions.assertEquals("APPROVED", updated.getKycStatus());
+        Assertions.assertEquals(UserRole.JASTIPER.name(), updated.getRole());
+    }
+
+    @Test
+    void shouldAllowAdminToRejectKycWithoutRoleUpgrade() throws Exception {
+        UserProfile target = new UserProfile();
+        target.setUsername("kyc_reject_target");
+        target.setEmail("kyc_reject_target@example.com");
+        target.setPassword("dummy");
+        target.setRole(UserRole.TITIPER.name());
+        target.setKycStatus("PENDING");
+        UserProfile saved = userProfileRepository.save(target);
+
+        String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+        Map<String, Object> request = Map.of(
+                "userId", saved.getId(),
+                "decision", "REJECT"
+        );
+
+        mockMvc.perform(put("/api/profile/admin/kyc/decision")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Keputusan KYC berhasil diproses!"))
+                .andExpect(jsonPath("$.data.userId").value(saved.getId()))
+                .andExpect(jsonPath("$.data.oldKycStatus").value("PENDING"))
+                .andExpect(jsonPath("$.data.newKycStatus").value("REJECTED"))
+                .andExpect(jsonPath("$.data.oldRole").value("TITIPER"))
+                .andExpect(jsonPath("$.data.newRole").value("TITIPER"));
+
+        UserProfile updated = userProfileRepository.findById(saved.getId())
+                .orElseThrow(() -> new AssertionError("User target harus tetap ada"));
+        Assertions.assertEquals("REJECTED", updated.getKycStatus());
+        Assertions.assertEquals(UserRole.TITIPER.name(), updated.getRole());
+    }
+
+    @Test
+    void shouldAllowAdminToDemoteJastiperRole() throws Exception {
+        UserProfile target = new UserProfile();
+        target.setUsername("demote_target");
+        target.setEmail("demote_target@example.com");
+        target.setPassword("dummy");
+        target.setRole(UserRole.JASTIPER.name());
+        target.setKycStatus("APPROVED");
+        UserProfile saved = userProfileRepository.save(target);
+
+        String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+        Map<String, Object> request = Map.of("userId", saved.getId());
+
+        mockMvc.perform(put("/api/profile/admin/role/demote")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Role user berhasil di-demote ke TITIPER!"))
+                .andExpect(jsonPath("$.data.userId").value(saved.getId()))
+                .andExpect(jsonPath("$.data.oldRole").value("JASTIPER"))
+                .andExpect(jsonPath("$.data.newRole").value("TITIPER"));
+
+        UserProfile updated = userProfileRepository.findById(saved.getId())
+                .orElseThrow(() -> new AssertionError("User target harus tetap ada"));
+        Assertions.assertEquals(UserRole.TITIPER.name(), updated.getRole());
+    }
+
+    @Test
+    void shouldRejectDemoteRoleForNonAdmin() throws Exception {
+        UserProfile target = new UserProfile();
+        target.setUsername("demote_non_admin_target");
+        target.setEmail("demote_non_admin_target@example.com");
+        target.setPassword("dummy");
+        target.setRole(UserRole.JASTIPER.name());
+        target.setKycStatus("APPROVED");
+        UserProfile saved = userProfileRepository.save(target);
+
+        String nonAdminToken = jwtUtil.generateToken("titiper_test@example.com", "TITIPER");
+        Map<String, Object> request = Map.of("userId", saved.getId());
+
+        mockMvc.perform(put("/api/profile/admin/role/demote")
+                        .header("Authorization", "Bearer " + nonAdminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.message").value("Akses ditolak!"));
+    }
+
+    @Test
     void shouldRejectRoleUpgradeWhenUserIdMissing() throws Exception {
         String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
 
