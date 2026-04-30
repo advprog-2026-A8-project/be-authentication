@@ -2,7 +2,9 @@ package id.ac.ui.cs.advprog.beauthentication.service;
 
 import id.ac.ui.cs.advprog.beauthentication.dto.AccountStatusUpdateResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.BulkProfileLookupResponse;
+import id.ac.ui.cs.advprog.beauthentication.dto.KycDecisionResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.KycSubmissionRequest;
+import id.ac.ui.cs.advprog.beauthentication.dto.RoleDemoteResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.RoleUpgradeResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.UserLookupSummaryResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.UpdateProfileRequest;
@@ -24,6 +26,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class ProfileService {
+
+    private static final String KYC_APPROVE = "APPROVE";
+    private static final String KYC_REJECT = "REJECT";
 
     @Autowired
     private UserProfileRepository repository;
@@ -146,6 +151,73 @@ public class ProfileService {
         UserProfile updated = repository.save(user);
 
         return new RoleUpgradeResponse(updated.getId(), oldRole, updated.getRole());
+    }
+
+    public RoleDemoteResponse demoteRoleToTitiper(Long userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("userId wajib diisi!");
+        }
+
+        UserProfile user = repository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Pengguna tidak ditemukan!"));
+
+        String oldRole = user.getRole();
+
+        if (UserRole.ADMIN.name().equals(oldRole)) {
+            throw new IllegalArgumentException("Admin tidak dapat di-demote!");
+        }
+
+        if (UserRole.TITIPER.name().equals(oldRole)) {
+            return new RoleDemoteResponse(user.getId(), oldRole, user.getRole());
+        }
+
+        if (!UserRole.JASTIPER.name().equals(oldRole)) {
+            throw new IllegalArgumentException("Role user tidak valid!");
+        }
+
+        user.setRole(UserRole.TITIPER.name());
+        UserProfile updated = repository.save(user);
+
+        return new RoleDemoteResponse(updated.getId(), oldRole, updated.getRole());
+    }
+
+    public KycDecisionResponse decideKyc(Long userId, String decision) {
+        if (userId == null) {
+            throw new IllegalArgumentException("userId wajib diisi!");
+        }
+
+        if (isBlank(decision)) {
+            throw new IllegalArgumentException("decision wajib diisi!");
+        }
+
+        String normalizedDecision = decision.trim().toUpperCase(Locale.ROOT);
+        if (!KYC_APPROVE.equals(normalizedDecision) && !KYC_REJECT.equals(normalizedDecision)) {
+            throw new IllegalArgumentException("decision tidak valid!");
+        }
+
+        UserProfile user = repository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Pengguna tidak ditemukan!"));
+
+        String oldKycStatus = user.getKycStatus();
+        String oldRole = user.getRole();
+
+        if (KYC_APPROVE.equals(normalizedDecision)) {
+            user.setKycStatus(KycStatus.APPROVED.name());
+            if (UserRole.TITIPER.name().equals(oldRole)) {
+                user.setRole(UserRole.JASTIPER.name());
+            }
+        } else {
+            user.setKycStatus(KycStatus.REJECTED.name());
+        }
+
+        UserProfile updated = repository.save(user);
+        return new KycDecisionResponse(
+                updated.getId(),
+                oldKycStatus,
+                updated.getKycStatus(),
+                oldRole,
+                updated.getRole()
+        );
     }
 
     public AccountStatusUpdateResponse updateAccountStatus(Long userId, String status) {
