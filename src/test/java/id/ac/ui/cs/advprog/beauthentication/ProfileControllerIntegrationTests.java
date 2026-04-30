@@ -548,6 +548,31 @@ class ProfileControllerIntegrationTests {
         Assertions.assertEquals(UserRole.TITIPER.name(), updated.getRole());
     }
 
+        @Test
+        void shouldRejectDemoteRoleWhenUserIdMissing() throws Exception {
+                String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+
+                mockMvc.perform(put("/api/profile/admin/role/demote")
+                                                .header("Authorization", "Bearer " + adminToken)
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .content("{}"))
+                                .andExpect(status().isBadRequest())
+                                .andExpect(jsonPath("$.message").value("userId wajib diisi!"));
+        }
+
+        @Test
+        void shouldReturnNotFoundWhenDemoteRoleUserDoesNotExist() throws Exception {
+                String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+                Map<String, Object> request = Map.of("userId", 999999L);
+
+                mockMvc.perform(put("/api/profile/admin/role/demote")
+                                                .header("Authorization", "Bearer " + adminToken)
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .content(objectMapper.writeValueAsString(request)))
+                                .andExpect(status().isNotFound())
+                                .andExpect(jsonPath("$.message").value("Pengguna tidak ditemukan!"));
+        }
+
     @Test
     void shouldRejectKycDecisionWhenDecisionMissing() throws Exception {
         UserProfile target = new UserProfile();
@@ -568,6 +593,19 @@ class ProfileControllerIntegrationTests {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("decision wajib diisi!"));
     }
+
+        @Test
+        void shouldRejectKycDecisionWhenUserIdMissing() throws Exception {
+                String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+                Map<String, Object> request = Map.of("decision", "APPROVE");
+
+                mockMvc.perform(put("/api/profile/admin/kyc/decision")
+                                                .header("Authorization", "Bearer " + adminToken)
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .content(objectMapper.writeValueAsString(request)))
+                                .andExpect(status().isBadRequest())
+                                .andExpect(jsonPath("$.message").value("userId wajib diisi!"));
+        }
 
     @Test
     void shouldRejectKycDecisionWhenDecisionInvalid() throws Exception {
@@ -591,6 +629,22 @@ class ProfileControllerIntegrationTests {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("decision tidak valid!"));
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenKycDecisionUserDoesNotExist() throws Exception {
+        String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+        Map<String, Object> request = Map.of(
+                "userId", 999999L,
+                "decision", "APPROVE"
+        );
+
+        mockMvc.perform(put("/api/profile/admin/kyc/decision")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Pengguna tidak ditemukan!"));
     }
 
     @Test
