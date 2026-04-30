@@ -717,6 +717,20 @@ class ProfileControllerIntegrationTests {
     }
 
     @Test
+    void shouldRejectKycDecisionWithoutToken() throws Exception {
+        Map<String, Object> request = Map.of(
+                "userId", 1L,
+                "decision", "APPROVE"
+        );
+
+        mockMvc.perform(put("/api/profile/admin/kyc/decision")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("Autentikasi diperlukan!"));
+    }
+
+    @Test
     void shouldRejectDemoteRoleForNonAdmin() throws Exception {
         UserProfile target = new UserProfile();
         target.setUsername("demote_non_admin_target");
@@ -736,6 +750,17 @@ class ProfileControllerIntegrationTests {
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message").value("Akses ditolak!"));
     }
+
+        @Test
+        void shouldRejectDemoteRoleWithoutToken() throws Exception {
+                Map<String, Object> request = Map.of("userId", 1L);
+
+                mockMvc.perform(put("/api/profile/admin/role/demote")
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .content(objectMapper.writeValueAsString(request)))
+                                .andExpect(status().isUnauthorized())
+                                .andExpect(jsonPath("$.message").value("Autentikasi diperlukan!"));
+        }
 
     @Test
     void shouldRejectRoleUpgradeWhenUserIdMissing() throws Exception {
