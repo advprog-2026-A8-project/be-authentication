@@ -549,6 +549,75 @@ class ProfileControllerIntegrationTests {
     }
 
     @Test
+    void shouldRejectKycDecisionWhenDecisionMissing() throws Exception {
+        UserProfile target = new UserProfile();
+        target.setUsername("kyc_missing_decision");
+        target.setEmail("kyc_missing_decision@example.com");
+        target.setPassword("dummy");
+        target.setRole(UserRole.TITIPER.name());
+        target.setKycStatus("PENDING");
+        UserProfile saved = userProfileRepository.save(target);
+
+        String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+        Map<String, Object> request = Map.of("userId", saved.getId());
+
+        mockMvc.perform(put("/api/profile/admin/kyc/decision")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("decision wajib diisi!"));
+    }
+
+    @Test
+    void shouldRejectKycDecisionWhenDecisionInvalid() throws Exception {
+        UserProfile target = new UserProfile();
+        target.setUsername("kyc_invalid_decision");
+        target.setEmail("kyc_invalid_decision@example.com");
+        target.setPassword("dummy");
+        target.setRole(UserRole.TITIPER.name());
+        target.setKycStatus("PENDING");
+        UserProfile saved = userProfileRepository.save(target);
+
+        String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+        Map<String, Object> request = Map.of(
+                "userId", saved.getId(),
+                "decision", "INVALID"
+        );
+
+        mockMvc.perform(put("/api/profile/admin/kyc/decision")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("decision tidak valid!"));
+    }
+
+    @Test
+    void shouldRejectKycDecisionForNonAdmin() throws Exception {
+        UserProfile target = new UserProfile();
+        target.setUsername("kyc_non_admin_target");
+        target.setEmail("kyc_non_admin_target@example.com");
+        target.setPassword("dummy");
+        target.setRole(UserRole.TITIPER.name());
+        target.setKycStatus("PENDING");
+        UserProfile saved = userProfileRepository.save(target);
+
+        String nonAdminToken = jwtUtil.generateToken("titiper_test@example.com", "TITIPER");
+        Map<String, Object> request = Map.of(
+                "userId", saved.getId(),
+                "decision", "APPROVE"
+        );
+
+        mockMvc.perform(put("/api/profile/admin/kyc/decision")
+                        .header("Authorization", "Bearer " + nonAdminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.message").value("Akses ditolak!"));
+    }
+
+    @Test
     void shouldRejectDemoteRoleForNonAdmin() throws Exception {
         UserProfile target = new UserProfile();
         target.setUsername("demote_non_admin_target");
