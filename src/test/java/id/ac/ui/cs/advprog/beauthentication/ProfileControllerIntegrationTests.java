@@ -549,6 +549,51 @@ class ProfileControllerIntegrationTests {
     }
 
         @Test
+        void shouldAllowAdminToDemoteTitiperWithoutChanges() throws Exception {
+                UserProfile target = new UserProfile();
+                target.setUsername("demote_titiper_target");
+                target.setEmail("demote_titiper_target@example.com");
+                target.setPassword("dummy");
+                target.setRole(UserRole.TITIPER.name());
+                target.setKycStatus("PENDING");
+                UserProfile saved = userProfileRepository.save(target);
+
+                String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+                Map<String, Object> request = Map.of("userId", saved.getId());
+
+                mockMvc.perform(put("/api/profile/admin/role/demote")
+                                                .header("Authorization", "Bearer " + adminToken)
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .content(objectMapper.writeValueAsString(request)))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.message").value("Role user berhasil di-demote ke TITIPER!"))
+                                .andExpect(jsonPath("$.data.userId").value(saved.getId()))
+                                .andExpect(jsonPath("$.data.oldRole").value("TITIPER"))
+                                .andExpect(jsonPath("$.data.newRole").value("TITIPER"));
+        }
+
+        @Test
+        void shouldRejectDemoteRoleWhenTargetIsAdmin() throws Exception {
+                UserProfile target = new UserProfile();
+                target.setUsername("demote_admin_target");
+                target.setEmail("demote_admin_target@example.com");
+                target.setPassword("dummy");
+                target.setRole(UserRole.ADMIN.name());
+                target.setKycStatus("APPROVED");
+                UserProfile saved = userProfileRepository.save(target);
+
+                String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+                Map<String, Object> request = Map.of("userId", saved.getId());
+
+                mockMvc.perform(put("/api/profile/admin/role/demote")
+                                                .header("Authorization", "Bearer " + adminToken)
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .content(objectMapper.writeValueAsString(request)))
+                                .andExpect(status().isBadRequest())
+                                .andExpect(jsonPath("$.message").value("Admin tidak dapat di-demote!"));
+        }
+
+        @Test
         void shouldRejectDemoteRoleWhenUserIdMissing() throws Exception {
                 String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
 
