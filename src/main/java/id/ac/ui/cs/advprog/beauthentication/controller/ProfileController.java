@@ -5,9 +5,13 @@ import id.ac.ui.cs.advprog.beauthentication.dto.AccountStatusUpdateResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.ApiResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.BulkProfileLookupRequest;
 import id.ac.ui.cs.advprog.beauthentication.dto.BulkProfileLookupResponse;
+import id.ac.ui.cs.advprog.beauthentication.dto.KycDecisionRequest;
+import id.ac.ui.cs.advprog.beauthentication.dto.KycDecisionResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.KycSubmissionRequest;
 import id.ac.ui.cs.advprog.beauthentication.dto.KycSubmissionResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.ProfileResponse;
+import id.ac.ui.cs.advprog.beauthentication.dto.RoleDemoteRequest;
+import id.ac.ui.cs.advprog.beauthentication.dto.RoleDemoteResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.RoleUpgradeRequest;
 import id.ac.ui.cs.advprog.beauthentication.dto.RoleUpgradeResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.UpdateProfileRequest;
@@ -137,6 +141,39 @@ public class ProfileController {
             Long userId = request == null ? null : request.getUserId();
             RoleUpgradeResponse response = profileService.upgradeRoleToJastiper(userId);
             return ResponseEntity.ok(new ApiResponse<>("Role user berhasil di-upgrade ke JASTIPER!", response));
+        } catch (IllegalArgumentException e) {
+            HttpStatus status = isNotFound(e.getMessage()) ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST;
+            return ResponseEntity.status(status)
+                    .body(new ApiResponse<>(e.getMessage(), null));
+        }
+    }
+
+    @PutMapping("/admin/role/demote")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<RoleDemoteResponse>> demoteRoleToTitiper(
+            @RequestBody RoleDemoteRequest request
+    ) {
+        try {
+            Long userId = request == null ? null : request.getUserId();
+            RoleDemoteResponse response = profileService.demoteRoleToTitiper(userId);
+            return ResponseEntity.ok(new ApiResponse<>("Role user berhasil di-demote ke TITIPER!", response));
+        } catch (IllegalArgumentException e) {
+            HttpStatus status = isNotFound(e.getMessage()) ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST;
+            return ResponseEntity.status(status)
+                    .body(new ApiResponse<>(e.getMessage(), null));
+        }
+    }
+
+    @PutMapping("/admin/kyc/decision")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<KycDecisionResponse>> decideKyc(
+            @RequestBody KycDecisionRequest request
+    ) {
+        try {
+            Long userId = request == null ? null : request.getUserId();
+            String decision = request == null ? null : request.getDecision();
+            KycDecisionResponse response = profileService.decideKyc(userId, decision);
+            return ResponseEntity.ok(new ApiResponse<>("Keputusan KYC berhasil diproses!", response));
         } catch (IllegalArgumentException e) {
             HttpStatus status = isNotFound(e.getMessage()) ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST;
             return ResponseEntity.status(status)
