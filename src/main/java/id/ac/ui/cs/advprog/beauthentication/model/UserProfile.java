@@ -50,4 +50,7 @@ public class UserProfile {
 
     @Column(name = "kyc_social_media_url")
     private String kycSocialMediaUrl;
+
+    @Column(name = "successful_transaction_count", nullable = false)
+    private Long successfulTransactionCount = 0L;
 }

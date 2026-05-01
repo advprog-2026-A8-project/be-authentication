@@ -15,4 +15,5 @@ public class ProfileResponse {
     private String role;
     private String accountStatus;
     private String kycStatus;
+    private Long successfulTransactionCount;
 }

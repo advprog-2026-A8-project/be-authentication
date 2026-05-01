@@ -53,7 +53,8 @@ public class ProfileController {
                 user.getBio(),
                 user.getRole(),
                 user.getAccountStatus(),
-                user.getKycStatus()
+                user.getKycStatus(),
+                user.getSuccessfulTransactionCount()
         );
     }
 
