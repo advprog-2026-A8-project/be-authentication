@@ -90,6 +90,24 @@ class AuthSecurityIntegrationTests {
     }
 
     @Test
+    void shouldAllowPublicProfileLookupWithInvalidJwt() throws Exception {
+        UserProfile user = new UserProfile();
+        user.setUsername("public_lookup_invalid");
+        user.setEmail("public_lookup_invalid@example.com");
+        user.setPassword("dummy");
+        user.setRole(UserRole.TITIPER.name());
+        user.setKycStatus(KycStatus.PENDING.name());
+        userProfileRepository.save(user);
+
+        mockMvc.perform(get("/api/profile/lookup")
+                        .header("Authorization", "Bearer invalid.token.value")
+                        .param("email", "public_lookup_invalid@example.com"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Profil berhasil ditemukan!"))
+                .andExpect(jsonPath("$.data.username").value("public_lookup_invalid"));
+    }
+
+    @Test
     void shouldAllowPublicJastiperListWithoutToken() throws Exception {
         UserProfile jastiper = new UserProfile();
         jastiper.setUsername("public_jastiper");
