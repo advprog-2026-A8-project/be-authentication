@@ -5,6 +5,8 @@ import id.ac.ui.cs.advprog.beauthentication.dto.AccountStatusUpdateResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.ApiResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.BulkProfileLookupRequest;
 import id.ac.ui.cs.advprog.beauthentication.dto.BulkProfileLookupResponse;
+import id.ac.ui.cs.advprog.beauthentication.dto.JastiperStatsUpdateRequest;
+import id.ac.ui.cs.advprog.beauthentication.dto.JastiperStatsUpdateResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.KycDecisionRequest;
 import id.ac.ui.cs.advprog.beauthentication.dto.KycDecisionResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.KycSubmissionRequest;
@@ -175,6 +177,23 @@ public class ProfileController {
             String decision = request == null ? null : request.getDecision();
             KycDecisionResponse response = profileService.decideKyc(userId, decision);
             return ResponseEntity.ok(new ApiResponse<>("Keputusan KYC berhasil diproses!", response));
+        } catch (IllegalArgumentException e) {
+            HttpStatus status = isNotFound(e.getMessage()) ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST;
+            return ResponseEntity.status(status)
+                    .body(new ApiResponse<>(e.getMessage(), null));
+        }
+    }
+
+    @PutMapping("/admin/jastiper/stats")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<JastiperStatsUpdateResponse>> updateJastiperStats(
+            @RequestBody JastiperStatsUpdateRequest request
+    ) {
+        try {
+            Long userId = request == null ? null : request.getUserId();
+            Long delta = request == null ? null : request.getDelta();
+            JastiperStatsUpdateResponse response = profileService.incrementSuccessfulTransactionCount(userId, delta);
+            return ResponseEntity.ok(new ApiResponse<>("Statistik Jastiper berhasil diperbarui!", response));
         } catch (IllegalArgumentException e) {
             HttpStatus status = isNotFound(e.getMessage()) ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST;
             return ResponseEntity.status(status)

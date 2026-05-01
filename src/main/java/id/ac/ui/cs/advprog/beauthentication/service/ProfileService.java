@@ -2,6 +2,7 @@ package id.ac.ui.cs.advprog.beauthentication.service;
 
 import id.ac.ui.cs.advprog.beauthentication.dto.AccountStatusUpdateResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.BulkProfileLookupResponse;
+import id.ac.ui.cs.advprog.beauthentication.dto.JastiperStatsUpdateResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.KycDecisionResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.KycSubmissionRequest;
 import id.ac.ui.cs.advprog.beauthentication.dto.RoleDemoteResponse;
@@ -218,6 +219,38 @@ public class ProfileService {
                 oldRole,
                 updated.getRole()
         );
+    }
+
+    public JastiperStatsUpdateResponse incrementSuccessfulTransactionCount(Long userId, Long delta) {
+        if (userId == null) {
+            throw new IllegalArgumentException("userId wajib diisi!");
+        }
+
+        if (delta == null) {
+            throw new IllegalArgumentException("delta wajib diisi!");
+        }
+
+        if (delta <= 0) {
+            throw new IllegalArgumentException("delta harus lebih besar dari 0!");
+        }
+
+        UserProfile user = repository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Pengguna tidak ditemukan!"));
+
+        if (!UserRole.JASTIPER.name().equals(user.getRole())) {
+            throw new IllegalArgumentException("Hanya JASTIPER yang dapat diupdate statistiknya!");
+        }
+
+        Long oldCount = user.getSuccessfulTransactionCount();
+        if (oldCount == null) {
+            oldCount = 0L;
+        }
+
+        long newCount = oldCount + delta;
+        user.setSuccessfulTransactionCount(newCount);
+        UserProfile updated = repository.save(user);
+
+        return new JastiperStatsUpdateResponse(updated.getId(), oldCount, updated.getSuccessfulTransactionCount());
     }
 
     public AccountStatusUpdateResponse updateAccountStatus(Long userId, String status) {
