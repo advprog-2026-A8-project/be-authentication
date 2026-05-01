@@ -762,6 +762,174 @@ class ProfileControllerIntegrationTests {
                                 .andExpect(jsonPath("$.message").value("Autentikasi diperlukan!"));
         }
 
+            @Test
+            void shouldAllowAdminToIncrementJastiperStats() throws Exception {
+                UserProfile target = new UserProfile();
+                target.setUsername("stats_jastiper");
+                target.setEmail("stats_jastiper@example.com");
+                target.setPassword("dummy");
+                target.setRole(UserRole.JASTIPER.name());
+                target.setKycStatus("APPROVED");
+                target.setSuccessfulTransactionCount(2L);
+                UserProfile saved = userProfileRepository.save(target);
+
+                String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+                Map<String, Object> request = Map.of(
+                        "userId", saved.getId(),
+                        "delta", 3
+                );
+
+                mockMvc.perform(put("/api/profile/admin/jastiper/stats")
+                                .header("Authorization", "Bearer " + adminToken)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.message").value("Statistik Jastiper berhasil diperbarui!"))
+                        .andExpect(jsonPath("$.data.userId").value(saved.getId()))
+                        .andExpect(jsonPath("$.data.oldCount").value(2))
+                        .andExpect(jsonPath("$.data.newCount").value(5));
+
+                UserProfile updated = userProfileRepository.findById(saved.getId())
+                        .orElseThrow(() -> new AssertionError("User target harus tetap ada"));
+                Assertions.assertEquals(5L, updated.getSuccessfulTransactionCount());
+            }
+
+            @Test
+            void shouldRejectJastiperStatsUpdateWhenUserIdMissing() throws Exception {
+                String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+                Map<String, Object> request = Map.of("delta", 1);
+
+                mockMvc.perform(put("/api/profile/admin/jastiper/stats")
+                                .header("Authorization", "Bearer " + adminToken)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.message").value("userId wajib diisi!"));
+            }
+
+            @Test
+            void shouldRejectJastiperStatsUpdateWhenDeltaMissing() throws Exception {
+                UserProfile target = new UserProfile();
+                target.setUsername("stats_missing_delta");
+                target.setEmail("stats_missing_delta@example.com");
+                target.setPassword("dummy");
+                target.setRole(UserRole.JASTIPER.name());
+                target.setKycStatus("APPROVED");
+                UserProfile saved = userProfileRepository.save(target);
+
+                String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+                Map<String, Object> request = Map.of("userId", saved.getId());
+
+                mockMvc.perform(put("/api/profile/admin/jastiper/stats")
+                                .header("Authorization", "Bearer " + adminToken)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.message").value("delta wajib diisi!"));
+            }
+
+            @Test
+            void shouldRejectJastiperStatsUpdateWhenDeltaNotPositive() throws Exception {
+                UserProfile target = new UserProfile();
+                target.setUsername("stats_delta_zero");
+                target.setEmail("stats_delta_zero@example.com");
+                target.setPassword("dummy");
+                target.setRole(UserRole.JASTIPER.name());
+                target.setKycStatus("APPROVED");
+                UserProfile saved = userProfileRepository.save(target);
+
+                String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+                Map<String, Object> request = Map.of(
+                        "userId", saved.getId(),
+                        "delta", 0
+                );
+
+                mockMvc.perform(put("/api/profile/admin/jastiper/stats")
+                                .header("Authorization", "Bearer " + adminToken)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.message").value("delta harus lebih besar dari 0!"));
+            }
+
+            @Test
+            void shouldRejectJastiperStatsUpdateForNonJastiper() throws Exception {
+                UserProfile target = new UserProfile();
+                target.setUsername("stats_non_jastiper");
+                target.setEmail("stats_non_jastiper@example.com");
+                target.setPassword("dummy");
+                target.setRole(UserRole.TITIPER.name());
+                target.setKycStatus("PENDING");
+                UserProfile saved = userProfileRepository.save(target);
+
+                String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+                Map<String, Object> request = Map.of(
+                        "userId", saved.getId(),
+                        "delta", 1
+                );
+
+                mockMvc.perform(put("/api/profile/admin/jastiper/stats")
+                                .header("Authorization", "Bearer " + adminToken)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.message").value("Hanya JASTIPER yang dapat diupdate statistiknya!"));
+            }
+
+            @Test
+            void shouldRejectJastiperStatsUpdateWhenUserNotFound() throws Exception {
+                String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+                Map<String, Object> request = Map.of(
+                        "userId", 999999L,
+                        "delta", 1
+                );
+
+                mockMvc.perform(put("/api/profile/admin/jastiper/stats")
+                                .header("Authorization", "Bearer " + adminToken)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                        .andExpect(status().isNotFound())
+                        .andExpect(jsonPath("$.message").value("Pengguna tidak ditemukan!"));
+            }
+
+            @Test
+            void shouldRejectJastiperStatsUpdateForNonAdmin() throws Exception {
+                UserProfile target = new UserProfile();
+                target.setUsername("stats_non_admin");
+                target.setEmail("stats_non_admin@example.com");
+                target.setPassword("dummy");
+                target.setRole(UserRole.JASTIPER.name());
+                target.setKycStatus("APPROVED");
+                UserProfile saved = userProfileRepository.save(target);
+
+                String nonAdminToken = jwtUtil.generateToken("titiper_test@example.com", "TITIPER");
+                Map<String, Object> request = Map.of(
+                        "userId", saved.getId(),
+                        "delta", 1
+                );
+
+                mockMvc.perform(put("/api/profile/admin/jastiper/stats")
+                                .header("Authorization", "Bearer " + nonAdminToken)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                        .andExpect(status().isForbidden())
+                        .andExpect(jsonPath("$.message").value("Akses ditolak!"));
+            }
+
+            @Test
+            void shouldRejectJastiperStatsUpdateWithoutToken() throws Exception {
+                Map<String, Object> request = Map.of(
+                        "userId", 1L,
+                        "delta", 1
+                );
+
+                mockMvc.perform(put("/api/profile/admin/jastiper/stats")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                        .andExpect(status().isUnauthorized())
+                        .andExpect(jsonPath("$.message").value("Autentikasi diperlukan!"));
+            }
+
     @Test
     void shouldRejectRoleUpgradeWhenUserIdMissing() throws Exception {
         String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
