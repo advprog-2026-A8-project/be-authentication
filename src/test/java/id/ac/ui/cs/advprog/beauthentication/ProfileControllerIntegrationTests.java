@@ -349,13 +349,23 @@ class ProfileControllerIntegrationTests {
                 .andExpect(jsonPath("$.message").value("Pengguna tidak ditemukan!"));
     }
 
-    @Test
-    void shouldRejectLookupProfileWithoutToken() throws Exception {
-        mockMvc.perform(get("/api/profile/lookup")
-                        .param("email", "someone@example.com"))
-                                .andExpect(status().isUnauthorized())
-                                .andExpect(jsonPath("$.message").value("Autentikasi diperlukan!"));
-    }
+        @Test
+        void shouldAllowLookupProfileWithoutToken() throws Exception {
+                UserProfile user = new UserProfile();
+                user.setUsername("public_lookup");
+                user.setEmail("public_lookup_profile@example.com");
+                user.setPassword("dummy");
+                user.setRole(UserRole.TITIPER.name());
+                user.setKycStatus("PENDING");
+                userProfileRepository.save(user);
+
+                mockMvc.perform(get("/api/profile/lookup")
+                                                .param("email", "public_lookup_profile@example.com"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.message").value("Profil berhasil ditemukan!"))
+                                .andExpect(jsonPath("$.data.username").value("public_lookup"))
+                                .andExpect(jsonPath("$.data.successfulTransactionCount").value(0));
+        }
 
     @Test
     void shouldBulkLookupProfilesSuccessfully() throws Exception {
@@ -1146,10 +1156,21 @@ class ProfileControllerIntegrationTests {
     }
 
         @Test
-        void shouldRejectGetJastiperProfilesWithoutToken() throws Exception {
+        void shouldAllowGetJastiperProfilesWithoutToken() throws Exception {
+                UserProfile jastiper = new UserProfile();
+                jastiper.setUsername("jastiper_public_list");
+                jastiper.setEmail("jastiper_public_list@example.com");
+                jastiper.setPassword("dummy");
+                jastiper.setRole(UserRole.JASTIPER.name());
+                jastiper.setKycStatus("APPROVED");
+                jastiper.setSuccessfulTransactionCount(4L);
+                userProfileRepository.save(jastiper);
+
                 mockMvc.perform(get("/api/profile/jastiper"))
-                                .andExpect(status().isUnauthorized())
-                                .andExpect(jsonPath("$.message").value("Autentikasi diperlukan!"));
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.message").value("Daftar jastiper berhasil diambil!"))
+                                .andExpect(jsonPath("$.data[0].username").value("jastiper_public_list"))
+                                .andExpect(jsonPath("$.data[0].successfulTransactionCount").value(4));
         }
 
     @Test
