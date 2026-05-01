@@ -37,7 +37,12 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/register", "/api/auth/login").permitAll() // Hanya register dan login yang public
+                    .requestMatchers(
+                        "/api/auth/register",
+                        "/api/auth/login",
+                        "/api/profile/lookup",
+                        "/api/profile/jastiper"
+                    ).permitAll() // Register, login, dan public profile
                         .anyRequest().authenticated() // Kunci endpoint lainnya (harus pakai token)
                 )
                 .exceptionHandling(exceptions -> exceptions

@@ -73,6 +73,40 @@ class AuthSecurityIntegrationTests {
     }
 
     @Test
+    void shouldAllowPublicProfileLookupWithoutToken() throws Exception {
+        UserProfile user = new UserProfile();
+        user.setUsername("public_lookup");
+        user.setEmail("public_lookup@example.com");
+        user.setPassword("dummy");
+        user.setRole(UserRole.TITIPER.name());
+        user.setKycStatus(KycStatus.PENDING.name());
+        userProfileRepository.save(user);
+
+        mockMvc.perform(get("/api/profile/lookup")
+                        .param("email", "public_lookup@example.com"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Profil berhasil ditemukan!"))
+                .andExpect(jsonPath("$.data.username").value("public_lookup"));
+    }
+
+    @Test
+    void shouldAllowPublicJastiperListWithoutToken() throws Exception {
+        UserProfile jastiper = new UserProfile();
+        jastiper.setUsername("public_jastiper");
+        jastiper.setEmail("public_jastiper@example.com");
+        jastiper.setPassword("dummy");
+        jastiper.setRole(UserRole.JASTIPER.name());
+        jastiper.setKycStatus(KycStatus.APPROVED.name());
+        userProfileRepository.save(jastiper);
+
+        mockMvc.perform(get("/api/profile/jastiper"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Daftar jastiper berhasil diambil!"))
+                .andExpect(jsonPath("$.data[0].username").value("public_jastiper"))
+                .andExpect(jsonPath("$.data[0].role").value("JASTIPER"));
+    }
+
+    @Test
     void shouldRejectKycSubmissionWithoutToken() throws Exception {
         mockMvc.perform(post("/api/profile/kyc/submit")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -110,11 +144,10 @@ class AuthSecurityIntegrationTests {
     }
 
     @Test
-    void shouldRejectJastiperEndpointWithInvalidJwt() throws Exception {
+    void shouldAllowJastiperEndpointWithInvalidJwt() throws Exception {
         mockMvc.perform(get("/api/profile/jastiper")
                         .header("Authorization", "Bearer invalid.token.value"))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message").value("Autentikasi diperlukan!"));
+                .andExpect(status().isOk());
     }
 
     @Test
