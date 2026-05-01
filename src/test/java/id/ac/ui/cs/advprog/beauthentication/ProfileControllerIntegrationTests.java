@@ -84,7 +84,8 @@ class ProfileControllerIntegrationTests {
                 .andExpect(jsonPath("$.data.username").value("profile_user"))
                 .andExpect(jsonPath("$.data.email").value("profile_user@example.com"))
                 .andExpect(jsonPath("$.data.role").value("TITIPER"))
-                .andExpect(jsonPath("$.data.kycStatus").value("PENDING"));
+                                .andExpect(jsonPath("$.data.kycStatus").value("PENDING"))
+                                .andExpect(jsonPath("$.data.successfulTransactionCount").value(0));
     }
 
     @Test
@@ -1183,6 +1184,7 @@ class ProfileControllerIntegrationTests {
         jastiper.setPassword("dummy");
         jastiper.setRole(UserRole.JASTIPER.name());
         jastiper.setKycStatus("PENDING");
+                jastiper.setSuccessfulTransactionCount(7L);
 
         UserProfile nonJastiper = new UserProfile();
         nonJastiper.setUsername("titiper_one");
@@ -1199,7 +1201,8 @@ class ProfileControllerIntegrationTests {
                 .andExpect(jsonPath("$.message").value("Daftar jastiper berhasil diambil!"))
                 .andExpect(jsonPath("$.data.length()").value(1))
                 .andExpect(jsonPath("$.data[0].username").value("jastiper_one"))
-                .andExpect(jsonPath("$.data[0].role").value("JASTIPER"));
+                .andExpect(jsonPath("$.data[0].role").value("JASTIPER"))
+                .andExpect(jsonPath("$.data[0].successfulTransactionCount").value(7));
     }
 
     @Test
