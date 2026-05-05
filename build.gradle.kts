@@ -2,6 +2,7 @@ plugins {
     java
     id("org.springframework.boot") version "3.5.10"
     id("io.spring.dependency-management") version "1.1.7"
+    id("org.sonarqube") version "7.2.3.7755"
 }
 
 group = "id.ac.ui.cs.advprog"
@@ -28,6 +29,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     runtimeOnly("com.h2database:h2")
+    runtimeOnly("org.postgresql:postgresql")
     compileOnly("org.projectlombok:lombok")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
@@ -42,4 +44,12 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+sonar {
+    properties {
+        property("sonar.projectKey", "advprog-2026-A8-project_be-authentication")
+        property("sonar.organization", "advprog-2026-a8-project")
+        property("sonar.host.url", "https://sonarcloud.io")
+    }
 }
