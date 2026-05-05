@@ -95,6 +95,7 @@ public class ProfileController {
     }
 
     @GetMapping("/all")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<ProfileResponse>>> getAllProfiles() {
         List<ProfileResponse> profiles = repository.findAll().stream()
                 .map(this::toProfileResponse)

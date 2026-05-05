@@ -389,7 +389,7 @@ class AuthControllerIntegrationTests {
         String responseBody = loginResult.getResponse().getContentAsString();
         String token = objectMapper.readTree(responseBody).path("data").path("token").asText();
 
-        mockMvc.perform(get("/api/profile/all")
+        mockMvc.perform(get("/api/profile/me")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk());
     }

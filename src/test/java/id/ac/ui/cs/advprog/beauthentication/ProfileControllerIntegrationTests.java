@@ -1293,8 +1293,9 @@ class ProfileControllerIntegrationTests {
                         .content(objectMapper.writeValueAsString(kycRequest)))
                 .andExpect(status().isOk());
 
+        String adminToken = jwtUtil.generateToken("list_user@example.com", "ADMIN");
         mockMvc.perform(get("/api/profile/all")
-                        .header("Authorization", "Bearer " + token))
+                        .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Daftar profil berhasil diambil!"))
                 .andExpect(jsonPath("$.data[0].username").value("list_user"))
