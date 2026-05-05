@@ -393,4 +393,34 @@ class AuthControllerIntegrationTests {
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk());
     }
+
+    @Test
+    void shouldRejectLoginWhenUserIsBanned() throws Exception {
+        Map<String, String> registerRequest = Map.of(
+                "username", "banned_login_user",
+                "email", "banned_login_user@example.com",
+                "password", "password123"
+        );
+
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(registerRequest)))
+                .andExpect(status().isOk());
+
+        userProfileRepository.findByEmail("banned_login_user@example.com").ifPresent(user -> {
+            user.setAccountStatus("BANNED");
+            userProfileRepository.save(user);
+        });
+
+        Map<String, String> loginRequest = Map.of(
+                "email", "banned_login_user@example.com",
+                "password", "password123"
+        );
+
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("Akun Anda telah di-ban!"));
+    }
 }

@@ -116,6 +116,10 @@ public class AuthService {
             throw new IllegalArgumentException("Password salah!");
         }
 
+        if (AccountStatus.BANNED.name().equals(user.getAccountStatus())) {
+            throw new IllegalArgumentException("Akun Anda telah di-ban!");
+        }
+
         return user;
     }
 }

@@ -25,7 +25,9 @@ public class AuthController {
     private JwtUtil jwtUtil;
 
     private boolean isAuthenticationFailure(String message) {
-        return "Email tidak ditemukan!".equals(message) || "Password salah!".equals(message);
+        return "Email tidak ditemukan!".equals(message)
+                || "Password salah!".equals(message)
+                || "Akun Anda telah di-ban!".equals(message);
     }
 
     private RegisterResponse toRegisterResponse(UserProfile user) {
