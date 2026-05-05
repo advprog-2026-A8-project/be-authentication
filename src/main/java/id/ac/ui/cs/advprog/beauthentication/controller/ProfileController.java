@@ -12,6 +12,7 @@ import id.ac.ui.cs.advprog.beauthentication.dto.KycDecisionResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.KycSubmissionRequest;
 import id.ac.ui.cs.advprog.beauthentication.dto.KycSubmissionResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.ProfileResponse;
+import id.ac.ui.cs.advprog.beauthentication.dto.PublicProfileResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.RoleDemoteRequest;
 import id.ac.ui.cs.advprog.beauthentication.dto.RoleDemoteResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.RoleUpgradeRequest;
@@ -68,6 +69,18 @@ public class ProfileController {
         return authentication.getName();
     }
 
+    private PublicProfileResponse toPublicProfileResponse(UserProfile user) {
+        return new PublicProfileResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getFullName(),
+                user.getBio(),
+                user.getRole(),
+                user.getKycStatus(),
+                user.getSuccessfulTransactionCount()
+        );
+    }
+
     private boolean isNotFound(String message) {
         return "Pengguna tidak ditemukan!".equals(message);
     }
@@ -99,22 +112,22 @@ public class ProfileController {
     }
 
     @GetMapping("/jastiper")
-    public ResponseEntity<ApiResponse<List<ProfileResponse>>> getAllJastiperProfiles() {
-        List<ProfileResponse> profiles = profileService.getAllJastiperProfiles().stream()
-                .map(this::toProfileResponse)
+    public ResponseEntity<ApiResponse<List<PublicProfileResponse>>> getAllJastiperProfiles() {
+        List<PublicProfileResponse> profiles = profileService.getAllJastiperProfiles().stream()
+                .map(this::toPublicProfileResponse)
                 .toList();
         return ResponseEntity.ok(new ApiResponse<>("Daftar jastiper berhasil diambil!", profiles));
     }
 
     @GetMapping("/lookup")
-    public ResponseEntity<ApiResponse<ProfileResponse>> lookupProfile(
+    public ResponseEntity<ApiResponse<PublicProfileResponse>> lookupProfile(
             @RequestParam(required = false) Long id,
             @RequestParam(required = false) String username,
             @RequestParam(required = false) String email
     ) {
         try {
             UserProfile user = profileService.getByIdentifier(id, username, email);
-            return ResponseEntity.ok(new ApiResponse<>("Profil berhasil ditemukan!", toProfileResponse(user)));
+            return ResponseEntity.ok(new ApiResponse<>("Profil berhasil ditemukan!", toPublicProfileResponse(user)));
         } catch (IllegalArgumentException e) {
             HttpStatus status = isNotFound(e.getMessage()) ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST;
             return ResponseEntity.status(status)
