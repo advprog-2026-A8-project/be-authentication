@@ -338,10 +338,16 @@ public class ProfileService {
         }
 
         UserProfile currentUser = getByPrincipal(principalIdentifier);
+
+        if (KycStatus.APPROVED.name().equals(currentUser.getKycStatus())) {
+            throw new IllegalArgumentException("KYC sudah disetujui dan tidak dapat diajukan ulang!");
+        }
+
         currentUser.setFullName(request.getFullName().trim());
         currentUser.setKycIdentityDocumentUrl(request.getIdentityDocumentUrl().trim());
         currentUser.setKycSocialMediaUrl(request.getSocialMediaUrl().trim());
         currentUser.setKycStatus(KycStatus.PENDING.name());
+        currentUser.setAccountStatus(AccountStatus.PENDING.name());
 
         return repository.save(currentUser);
     }
