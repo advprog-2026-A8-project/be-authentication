@@ -199,16 +199,22 @@ public class ProfileService {
         UserProfile user = repository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Pengguna tidak ditemukan!"));
 
+        if (!KycStatus.PENDING.name().equals(user.getKycStatus())) {
+            throw new IllegalArgumentException("KYC hanya dapat diputuskan jika statusnya PENDING!");
+        }
+
         String oldKycStatus = user.getKycStatus();
         String oldRole = user.getRole();
 
         if (KYC_APPROVE.equals(normalizedDecision)) {
             user.setKycStatus(KycStatus.APPROVED.name());
+            user.setAccountStatus(AccountStatus.ACTIVE.name());
             if (UserRole.TITIPER.name().equals(oldRole)) {
                 user.setRole(UserRole.JASTIPER.name());
             }
         } else {
             user.setKycStatus(KycStatus.REJECTED.name());
+            user.setAccountStatus(AccountStatus.ACTIVE.name());
         }
 
         UserProfile updated = repository.save(user);
