@@ -148,6 +148,10 @@ public class ProfileService {
             throw new IllegalArgumentException("Hanya user TITIPER yang dapat di-upgrade ke JASTIPER!");
         }
 
+        if (!KycStatus.APPROVED.name().equals(user.getKycStatus())) {
+            throw new IllegalArgumentException("Hanya user dengan KYC APPROVED yang dapat di-upgrade ke JASTIPER!");
+        }
+
         user.setRole(UserRole.JASTIPER.name());
         UserProfile updated = repository.save(user);
 
