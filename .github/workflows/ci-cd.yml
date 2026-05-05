@@ -60,14 +60,18 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           ./gradlew sonar \
-            -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} \
-            -Dsonar.pullrequest.branch=${{ github.head_ref }} \
-            -Dsonar.pullrequest.base=${{ github.base_ref }} \
+            -Dsonar.pullrequest.key="$SONAR_PR_KEY" \
+            -Dsonar.pullrequest.branch="$SONAR_PR_BRANCH" \
+            -Dsonar.pullrequest.base="$SONAR_PR_BASE" \
             -Dsonar.pullrequest.provider=GitHub \
-            -Dsonar.pullrequest.github.repository=${{ github.repository }}
+            -Dsonar.pullrequest.github.repository="$SONAR_REPOSITORY"
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_PR_KEY: ${{ github.event.pull_request.number }}
+          SONAR_PR_BRANCH: ${{ github.head_ref }}
+          SONAR_PR_BASE: ${{ github.base_ref }}
+          SONAR_REPOSITORY: ${{ github.repository }}
 
   build-and-deploy:
     name: Build and Deploy
