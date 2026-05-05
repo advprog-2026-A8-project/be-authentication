@@ -43,7 +43,7 @@ public class UserProfile {
     private String accountStatus = AccountStatus.ACTIVE.name();
 
     @Column(nullable = false)
-    private String kycStatus = "PENDING";
+    private String kycStatus = KycStatus.NOT_SUBMITTED.name();
 
     @Column(name = "kyc_identity_document_url")
     private String kycIdentityDocumentUrl;

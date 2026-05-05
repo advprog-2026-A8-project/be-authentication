@@ -87,7 +87,7 @@ public class AuthService {
 
         user.setRole(UserRole.TITIPER.name());
         user.setAccountStatus(AccountStatus.ACTIVE.name());
-        user.setKycStatus(KycStatus.PENDING.name());
+        user.setKycStatus(KycStatus.NOT_SUBMITTED.name());
 
         return repository.save(user);
     }
