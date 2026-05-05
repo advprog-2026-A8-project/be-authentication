@@ -1420,6 +1420,265 @@ class ProfileControllerIntegrationTests {
         Assertions.assertEquals("https://instagram.com/persisted_kyc", savedUser.getKycSocialMediaUrl());
         Assertions.assertEquals("PENDING", savedUser.getKycStatus());
     }
+
+    // =====================================================================
+    // New tests: KYC decision guard (Bug 3)
+    // =====================================================================
+
+    @Test
+    void shouldRejectKycDecisionWhenKycStatusIsNotSubmitted() throws Exception {
+        UserProfile target = new UserProfile();
+        target.setUsername("kyc_not_submitted");
+        target.setEmail("kyc_not_submitted@example.com");
+        target.setPassword("dummy");
+        target.setRole(UserRole.TITIPER.name());
+        target.setKycStatus("NOT_SUBMITTED");
+        UserProfile saved = userProfileRepository.save(target);
+
+        String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+        Map<String, Object> request = Map.of("userId", saved.getId(), "decision", "APPROVE");
+
+        mockMvc.perform(put("/api/profile/admin/kyc/decision")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("KYC hanya dapat diputuskan jika statusnya PENDING!"));
+    }
+
+    @Test
+    void shouldRejectKycDecisionWhenKycStatusIsAlreadyApproved() throws Exception {
+        UserProfile target = new UserProfile();
+        target.setUsername("kyc_already_approved");
+        target.setEmail("kyc_already_approved@example.com");
+        target.setPassword("dummy");
+        target.setRole(UserRole.JASTIPER.name());
+        target.setKycStatus("APPROVED");
+        UserProfile saved = userProfileRepository.save(target);
+
+        String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+        Map<String, Object> request = Map.of("userId", saved.getId(), "decision", "REJECT");
+
+        mockMvc.perform(put("/api/profile/admin/kyc/decision")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("KYC hanya dapat diputuskan jika statusnya PENDING!"));
+    }
+
+    @Test
+    void shouldRejectKycDecisionWhenKycStatusIsAlreadyRejected() throws Exception {
+        UserProfile target = new UserProfile();
+        target.setUsername("kyc_already_rejected");
+        target.setEmail("kyc_already_rejected@example.com");
+        target.setPassword("dummy");
+        target.setRole(UserRole.TITIPER.name());
+        target.setKycStatus("REJECTED");
+        UserProfile saved = userProfileRepository.save(target);
+
+        String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+        Map<String, Object> request = Map.of("userId", saved.getId(), "decision", "APPROVE");
+
+        mockMvc.perform(put("/api/profile/admin/kyc/decision")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("KYC hanya dapat diputuskan jika statusnya PENDING!"));
+    }
+
+    // =====================================================================
+    // New tests: upgradeRoleToJastiper KYC guard (Bug 2)
+    // =====================================================================
+
+    @Test
+    void shouldRejectRoleUpgradeWhenKycStatusIsNotSubmitted() throws Exception {
+        UserProfile target = new UserProfile();
+        target.setUsername("upgrade_not_submitted");
+        target.setEmail("upgrade_not_submitted@example.com");
+        target.setPassword("dummy");
+        target.setRole(UserRole.TITIPER.name());
+        target.setKycStatus("NOT_SUBMITTED");
+        UserProfile saved = userProfileRepository.save(target);
+
+        String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+        Map<String, Object> request = Map.of("userId", saved.getId());
+
+        mockMvc.perform(put("/api/profile/admin/role/upgrade")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Hanya user dengan KYC APPROVED yang dapat di-upgrade ke JASTIPER!"));
+    }
+
+    @Test
+    void shouldRejectRoleUpgradeWhenKycStatusIsPending() throws Exception {
+        UserProfile target = new UserProfile();
+        target.setUsername("upgrade_pending_kyc");
+        target.setEmail("upgrade_pending_kyc@example.com");
+        target.setPassword("dummy");
+        target.setRole(UserRole.TITIPER.name());
+        target.setKycStatus("PENDING");
+        UserProfile saved = userProfileRepository.save(target);
+
+        String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+        Map<String, Object> request = Map.of("userId", saved.getId());
+
+        mockMvc.perform(put("/api/profile/admin/role/upgrade")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Hanya user dengan KYC APPROVED yang dapat di-upgrade ke JASTIPER!"));
+    }
+
+    // =====================================================================
+    // New tests: submitKyc accountStatus flow (Bug 4)
+    // =====================================================================
+
+    @Test
+    void shouldSetAccountStatusToPendingAfterKycSubmission() throws Exception {
+        String token = registerAndLogin("kyc_status_check", "kyc_status_check@example.com", "password123");
+
+        Map<String, String> kycRequest = Map.of(
+                "fullName", "Status Check User",
+                "identityDocumentUrl", "https://example.com/status-check-doc",
+                "socialMediaUrl", "https://instagram.com/status_check"
+        );
+
+        mockMvc.perform(post("/api/profile/kyc/submit")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(kycRequest)))
+                .andExpect(status().isOk());
+
+        UserProfile savedUser = userProfileRepository.findByEmail("kyc_status_check@example.com")
+                .orElseThrow(() -> new AssertionError("User seharusnya ada di database"));
+
+        Assertions.assertEquals("PENDING", savedUser.getKycStatus());
+        Assertions.assertEquals(AccountStatus.PENDING.name(), savedUser.getAccountStatus());
+    }
+
+    @Test
+    void shouldResetAccountStatusToActiveAfterKycApproval() throws Exception {
+        UserProfile target = new UserProfile();
+        target.setUsername("kyc_approve_status");
+        target.setEmail("kyc_approve_status@example.com");
+        target.setPassword("dummy");
+        target.setRole(UserRole.TITIPER.name());
+        target.setKycStatus("PENDING");
+        target.setAccountStatus(AccountStatus.PENDING.name());
+        UserProfile saved = userProfileRepository.save(target);
+
+        String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+        Map<String, Object> request = Map.of("userId", saved.getId(), "decision", "APPROVE");
+
+        mockMvc.perform(put("/api/profile/admin/kyc/decision")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk());
+
+        UserProfile updated = userProfileRepository.findById(saved.getId())
+                .orElseThrow(() -> new AssertionError("User target harus tetap ada"));
+
+        Assertions.assertEquals("APPROVED", updated.getKycStatus());
+        Assertions.assertEquals(AccountStatus.ACTIVE.name(), updated.getAccountStatus());
+    }
+
+    @Test
+    void shouldResetAccountStatusToActiveAfterKycRejection() throws Exception {
+        UserProfile target = new UserProfile();
+        target.setUsername("kyc_reject_status");
+        target.setEmail("kyc_reject_status@example.com");
+        target.setPassword("dummy");
+        target.setRole(UserRole.TITIPER.name());
+        target.setKycStatus("PENDING");
+        target.setAccountStatus(AccountStatus.PENDING.name());
+        UserProfile saved = userProfileRepository.save(target);
+
+        String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+        Map<String, Object> request = Map.of("userId", saved.getId(), "decision", "REJECT");
+
+        mockMvc.perform(put("/api/profile/admin/kyc/decision")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk());
+
+        UserProfile updated = userProfileRepository.findById(saved.getId())
+                .orElseThrow(() -> new AssertionError("User target harus tetap ada"));
+
+        Assertions.assertEquals("REJECTED", updated.getKycStatus());
+        Assertions.assertEquals(AccountStatus.ACTIVE.name(), updated.getAccountStatus());
+    }
+
+    @Test
+    void shouldRejectKycResubmissionWhenAlreadyApproved() throws Exception {
+        String token = registerAndLogin("kyc_resubmit", "kyc_resubmit@example.com", "password123");
+
+        UserProfile user = userProfileRepository.findByEmail("kyc_resubmit@example.com")
+                .orElseThrow(() -> new AssertionError("User harus ada"));
+        user.setKycStatus("APPROVED");
+        userProfileRepository.save(user);
+
+        Map<String, String> kycRequest = Map.of(
+                "fullName", "Resubmit User",
+                "identityDocumentUrl", "https://example.com/doc",
+                "socialMediaUrl", "https://instagram.com/resubmit"
+        );
+
+        mockMvc.perform(post("/api/profile/kyc/submit")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(kycRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("KYC sudah disetujui dan tidak dapat diajukan ulang!"));
+    }
+
+    // =====================================================================
+    // New tests: public endpoint field safety (Bug 5)
+    // =====================================================================
+
+    @Test
+    void shouldNotExposeEmailOrAccountStatusOnPublicLookup() throws Exception {
+        UserProfile user = new UserProfile();
+        user.setUsername("public_safe_lookup");
+        user.setEmail("public_safe_lookup@example.com");
+        user.setPassword("dummy");
+        user.setRole(UserRole.TITIPER.name());
+        user.setKycStatus("NOT_SUBMITTED");
+        userProfileRepository.save(user);
+
+        mockMvc.perform(get("/api/profile/lookup")
+                        .param("username", "public_safe_lookup"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.username").value("public_safe_lookup"))
+                .andExpect(jsonPath("$.data.email").doesNotExist())
+                .andExpect(jsonPath("$.data.phoneNumber").doesNotExist())
+                .andExpect(jsonPath("$.data.accountStatus").doesNotExist())
+                .andExpect(jsonPath("$.data.kycStatus").value("NOT_SUBMITTED"));
+    }
+
+    @Test
+    void shouldNotExposeEmailOrAccountStatusOnPublicJastiperList() throws Exception {
+        UserProfile jastiper = new UserProfile();
+        jastiper.setUsername("public_safe_jastiper");
+        jastiper.setEmail("public_safe_jastiper@example.com");
+        jastiper.setPassword("dummy");
+        jastiper.setRole(UserRole.JASTIPER.name());
+        jastiper.setKycStatus("APPROVED");
+        jastiper.setSuccessfulTransactionCount(3L);
+        userProfileRepository.save(jastiper);
+
+        mockMvc.perform(get("/api/profile/jastiper"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].email").doesNotExist())
+                .andExpect(jsonPath("$.data[0].phoneNumber").doesNotExist())
+                .andExpect(jsonPath("$.data[0].accountStatus").doesNotExist());
+    }
 }
 
 
