@@ -84,7 +84,7 @@ class ProfileControllerIntegrationTests {
                 .andExpect(jsonPath("$.data.username").value("profile_user"))
                 .andExpect(jsonPath("$.data.email").value("profile_user@example.com"))
                 .andExpect(jsonPath("$.data.role").value("TITIPER"))
-                                .andExpect(jsonPath("$.data.kycStatus").value("PENDING"))
+                                .andExpect(jsonPath("$.data.kycStatus").value("NOT_SUBMITTED"))
                                 .andExpect(jsonPath("$.data.successfulTransactionCount").value(0));
     }
 
@@ -285,7 +285,7 @@ class ProfileControllerIntegrationTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Profil berhasil ditemukan!"))
                 .andExpect(jsonPath("$.data.username").value("lookup_user"))
-                .andExpect(jsonPath("$.data.email").value("lookup_user@example.com"));
+                .andExpect(jsonPath("$.data.email").doesNotExist());
     }
 
     @Test
@@ -301,7 +301,7 @@ class ProfileControllerIntegrationTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Profil berhasil ditemukan!"))
                 .andExpect(jsonPath("$.data.id").value(userId))
-                .andExpect(jsonPath("$.data.email").value("lookup_id_user@example.com"));
+                .andExpect(jsonPath("$.data.email").doesNotExist());
     }
 
     @Test
@@ -314,7 +314,7 @@ class ProfileControllerIntegrationTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Profil berhasil ditemukan!"))
                 .andExpect(jsonPath("$.data.username").value("lookup_username_user"))
-                .andExpect(jsonPath("$.data.email").value("lookup_username_user@example.com"));
+                .andExpect(jsonPath("$.data.email").doesNotExist());
     }
 
     @Test
@@ -440,8 +440,12 @@ class ProfileControllerIntegrationTests {
     @Test
     void shouldAllowAdminToUpgradeRoleToJastiper() throws Exception {
         registerAndLogin("upgrade_target", "upgrade_target@example.com", "password123");
-        Long targetUserId = userProfileRepository.findByEmail("upgrade_target@example.com")
-                .orElseThrow(() -> new AssertionError("User target harus ada")).getId();
+        UserProfile targetUser = userProfileRepository.findByEmail("upgrade_target@example.com")
+                .orElseThrow(() -> new AssertionError("User target harus ada"));
+        Long targetUserId = targetUser.getId();
+
+        targetUser.setKycStatus("APPROVED");
+        userProfileRepository.save(targetUser);
 
         String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
 
@@ -1311,7 +1315,7 @@ class ProfileControllerIntegrationTests {
                         .content(objectMapper.writeValueAsString(registerRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.role").value("TITIPER"))
-                .andExpect(jsonPath("$.data.kycStatus").value("PENDING"))
+                .andExpect(jsonPath("$.data.kycStatus").value("NOT_SUBMITTED"))
                 .andExpect(jsonPath("$.data.username").isString())
                 .andReturn();
 

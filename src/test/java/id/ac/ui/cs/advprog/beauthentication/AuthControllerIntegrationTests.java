@@ -57,7 +57,7 @@ class AuthControllerIntegrationTests {
                 .andExpect(jsonPath("$.data.username").value("new_user"))
                 .andExpect(jsonPath("$.data.email").value("new_user@example.com"))
                 .andExpect(jsonPath("$.data.role").value("TITIPER"))
-                .andExpect(jsonPath("$.data.kycStatus").value("PENDING"))
+                .andExpect(jsonPath("$.data.kycStatus").value("NOT_SUBMITTED"))
                 .andExpect(jsonPath("$.data.password").doesNotExist());
     }
 
@@ -75,7 +75,7 @@ class AuthControllerIntegrationTests {
                 .andExpect(jsonPath("$.data.username").isString())
                 .andExpect(jsonPath("$.data.username").isNotEmpty())
                 .andExpect(jsonPath("$.data.role").value("TITIPER"))
-                .andExpect(jsonPath("$.data.kycStatus").value("PENDING"));
+                .andExpect(jsonPath("$.data.kycStatus").value("NOT_SUBMITTED"));
     }
 
     @Test
