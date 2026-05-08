@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -292,15 +293,15 @@ class ProfileControllerIntegrationTests {
     void shouldLookupProfileByIdSuccessfully() throws Exception {
         String token = registerAndLogin("lookup_id_user", "lookup_id_user@example.com", "password123");
 
-        Long userId = userProfileRepository.findByEmail("lookup_id_user@example.com")
+        UUID userId = userProfileRepository.findByEmail("lookup_id_user@example.com")
                 .orElseThrow(() -> new AssertionError("User lookup_id_user harus ada")).getId();
 
         mockMvc.perform(get("/api/profile/lookup")
                         .header("Authorization", "Bearer " + token)
-                        .param("id", String.valueOf(userId)))
+                        .param("id", userId.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Profil berhasil ditemukan!"))
-                .andExpect(jsonPath("$.data.id").value(userId))
+                .andExpect(jsonPath("$.data.id").value(userId.toString()))
                 .andExpect(jsonPath("$.data.email").doesNotExist());
     }
 
@@ -373,13 +374,14 @@ class ProfileControllerIntegrationTests {
         String token = registerAndLogin("bulk_one", "bulk_one@example.com", "password123");
         registerAndLogin("bulk_two", "bulk_two@example.com", "password123");
 
-        Long firstId = userProfileRepository.findByEmail("bulk_one@example.com")
+        UUID firstId = userProfileRepository.findByEmail("bulk_one@example.com")
                 .orElseThrow(() -> new AssertionError("User bulk_one harus ada")).getId();
-        Long secondId = userProfileRepository.findByEmail("bulk_two@example.com")
+        UUID secondId = userProfileRepository.findByEmail("bulk_two@example.com")
                 .orElseThrow(() -> new AssertionError("User bulk_two harus ada")).getId();
+        UUID nonExistentId = UUID.randomUUID();
 
         Map<String, Object> request = Map.of(
-                "userIds", List.of(firstId, 999999L, secondId)
+                "userIds", List.of(firstId, nonExistentId, secondId)
         );
 
         mockMvc.perform(post("/api/profile/lookup/bulk")
@@ -389,11 +391,11 @@ class ProfileControllerIntegrationTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Bulk lookup profil berhasil!"))
                 .andExpect(jsonPath("$.data.users.length()").value(2))
-                .andExpect(jsonPath("$.data.users[0].id").value(firstId))
+                .andExpect(jsonPath("$.data.users[0].id").value(firstId.toString()))
                 .andExpect(jsonPath("$.data.users[0].role").value("TITIPER"))
-                .andExpect(jsonPath("$.data.users[1].id").value(secondId))
+                .andExpect(jsonPath("$.data.users[1].id").value(secondId.toString()))
                 .andExpect(jsonPath("$.data.notFoundIds.length()").value(1))
-                .andExpect(jsonPath("$.data.notFoundIds[0]").value(999999));
+                .andExpect(jsonPath("$.data.notFoundIds[0]").value(nonExistentId.toString()));
     }
 
     @Test
@@ -419,7 +421,7 @@ class ProfileControllerIntegrationTests {
                 mockMvc.perform(post("/api/profile/lookup/bulk")
                                                 .header("Authorization", "Bearer " + token)
                                                 .contentType(MediaType.APPLICATION_JSON)
-                                                .content("{\"userIds\":[1,null,2]}"))
+                                                .content("{\"userIds\":[\"" + UUID.randomUUID() + "\",null,\"" + UUID.randomUUID() + "\"]}"))
                                 .andExpect(status().isBadRequest())
                                 .andExpect(jsonPath("$.message").value("userIds tidak boleh berisi null!"));
         }
@@ -442,7 +444,7 @@ class ProfileControllerIntegrationTests {
         registerAndLogin("upgrade_target", "upgrade_target@example.com", "password123");
         UserProfile targetUser = userProfileRepository.findByEmail("upgrade_target@example.com")
                 .orElseThrow(() -> new AssertionError("User target harus ada"));
-        Long targetUserId = targetUser.getId();
+        UUID targetUserId = targetUser.getId();
 
         targetUser.setKycStatus("APPROVED");
         userProfileRepository.save(targetUser);
@@ -457,7 +459,7 @@ class ProfileControllerIntegrationTests {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Role user berhasil di-upgrade ke JASTIPER!"))
-                .andExpect(jsonPath("$.data.userId").value(targetUserId))
+                .andExpect(jsonPath("$.data.userId").value(targetUserId.toString()))
                 .andExpect(jsonPath("$.data.oldRole").value("TITIPER"))
                 .andExpect(jsonPath("$.data.newRole").value("JASTIPER"));
 
@@ -489,7 +491,7 @@ class ProfileControllerIntegrationTests {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Keputusan KYC berhasil diproses!"))
-                .andExpect(jsonPath("$.data.userId").value(saved.getId()))
+                .andExpect(jsonPath("$.data.userId").value(saved.getId().toString()))
                 .andExpect(jsonPath("$.data.oldKycStatus").value("PENDING"))
                 .andExpect(jsonPath("$.data.newKycStatus").value("APPROVED"))
                 .andExpect(jsonPath("$.data.oldRole").value("TITIPER"))
@@ -523,7 +525,7 @@ class ProfileControllerIntegrationTests {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Keputusan KYC berhasil diproses!"))
-                .andExpect(jsonPath("$.data.userId").value(saved.getId()))
+                .andExpect(jsonPath("$.data.userId").value(saved.getId().toString()))
                 .andExpect(jsonPath("$.data.oldKycStatus").value("PENDING"))
                 .andExpect(jsonPath("$.data.newKycStatus").value("REJECTED"))
                 .andExpect(jsonPath("$.data.oldRole").value("TITIPER"))
@@ -554,7 +556,7 @@ class ProfileControllerIntegrationTests {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Role user berhasil di-demote ke TITIPER!"))
-                .andExpect(jsonPath("$.data.userId").value(saved.getId()))
+                .andExpect(jsonPath("$.data.userId").value(saved.getId().toString()))
                 .andExpect(jsonPath("$.data.oldRole").value("JASTIPER"))
                 .andExpect(jsonPath("$.data.newRole").value("TITIPER"));
 
@@ -582,7 +584,7 @@ class ProfileControllerIntegrationTests {
                                                 .content(objectMapper.writeValueAsString(request)))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.message").value("Role user berhasil di-demote ke TITIPER!"))
-                                .andExpect(jsonPath("$.data.userId").value(saved.getId()))
+                                .andExpect(jsonPath("$.data.userId").value(saved.getId().toString()))
                                 .andExpect(jsonPath("$.data.oldRole").value("TITIPER"))
                                 .andExpect(jsonPath("$.data.newRole").value("TITIPER"));
         }
@@ -623,7 +625,7 @@ class ProfileControllerIntegrationTests {
         @Test
         void shouldReturnNotFoundWhenDemoteRoleUserDoesNotExist() throws Exception {
                 String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
-                Map<String, Object> request = Map.of("userId", 999999L);
+                Map<String, Object> request = Map.of("userId", UUID.randomUUID());
 
                 mockMvc.perform(put("/api/profile/admin/role/demote")
                                                 .header("Authorization", "Bearer " + adminToken)
@@ -695,7 +697,7 @@ class ProfileControllerIntegrationTests {
     void shouldReturnNotFoundWhenKycDecisionUserDoesNotExist() throws Exception {
         String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
         Map<String, Object> request = Map.of(
-                "userId", 999999L,
+                "userId", UUID.randomUUID(),
                 "decision", "APPROVE"
         );
 
@@ -800,7 +802,7 @@ class ProfileControllerIntegrationTests {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$.message").value("Statistik Jastiper berhasil diperbarui!"))
-                        .andExpect(jsonPath("$.data.userId").value(saved.getId()))
+                        .andExpect(jsonPath("$.data.userId").value(saved.getId().toString()))
                         .andExpect(jsonPath("$.data.oldCount").value(2))
                         .andExpect(jsonPath("$.data.newCount").value(5));
 
@@ -895,7 +897,7 @@ class ProfileControllerIntegrationTests {
             void shouldRejectJastiperStatsUpdateWhenUserNotFound() throws Exception {
                 String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
                 Map<String, Object> request = Map.of(
-                        "userId", 999999L,
+                        "userId", UUID.randomUUID(),
                         "delta", 1
                 );
 
@@ -961,7 +963,7 @@ class ProfileControllerIntegrationTests {
     void shouldReturnNotFoundWhenRoleUpgradeUserDoesNotExist() throws Exception {
         String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
 
-        Map<String, Object> request = Map.of("userId", 999999L);
+        Map<String, Object> request = Map.of("userId", UUID.randomUUID());
 
         mockMvc.perform(put("/api/profile/admin/role/upgrade")
                         .header("Authorization", "Bearer " + adminToken)
@@ -996,7 +998,7 @@ class ProfileControllerIntegrationTests {
     @Test
     void shouldRejectRoleUpgradeForNonAdmin() throws Exception {
         registerAndLogin("upgrade_non_admin", "upgrade_non_admin@example.com", "password123");
-        Long targetUserId = userProfileRepository.findByEmail("upgrade_non_admin@example.com")
+        UUID targetUserId = userProfileRepository.findByEmail("upgrade_non_admin@example.com")
                 .orElseThrow(() -> new AssertionError("User target harus ada")).getId();
 
         String nonAdminToken = jwtUtil.generateToken("titiper_test@example.com", "TITIPER");
@@ -1091,7 +1093,7 @@ class ProfileControllerIntegrationTests {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Status akun berhasil diperbarui!"))
-                .andExpect(jsonPath("$.data.userId").value(saved.getId()))
+                .andExpect(jsonPath("$.data.userId").value(saved.getId().toString()))
                 .andExpect(jsonPath("$.data.oldStatus").value("ACTIVE"))
                 .andExpect(jsonPath("$.data.newStatus").value("BANNED"));
 
@@ -1105,7 +1107,7 @@ class ProfileControllerIntegrationTests {
         String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
 
         Map<String, Object> request = Map.of(
-                "userId", 1L,
+                "userId", UUID.randomUUID(),
                 "status", "PENDING"
         );
 
