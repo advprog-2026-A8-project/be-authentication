@@ -70,3 +70,18 @@ sonar {
         property("sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml")
     }
 }
+
+tasks.named<org.springframework.boot.gradle.tasks.run.BootRun>("bootRun") {
+    val envFile = file("${rootDir}/.env")
+    if (envFile.exists()) {
+        envFile.readLines().forEach { line ->
+            val trimmed = line.trim()
+            if (trimmed.isNotEmpty() && !trimmed.startsWith("#")) {
+                val parts = trimmed.split("=", limit = 2)
+                if (parts.size == 2) {
+                    environment(parts[0].trim(), parts[1].trim())
+                }
+            }
+        }
+    }
+}
