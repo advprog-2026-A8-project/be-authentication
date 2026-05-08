@@ -22,6 +22,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Locale;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -58,7 +59,7 @@ public class ProfileService {
         return getByPrincipal(username);
     }
 
-    public UserProfile getByIdentifier(Long id, String username, String email) {
+    public UserProfile getByIdentifier(UUID id, String username, String email) {
         int providedCount = 0;
 
         if (id != null) {
@@ -102,7 +103,7 @@ public class ProfileService {
         return repository.findAll();
     }
 
-    public BulkProfileLookupResponse bulkLookupByIds(List<Long> userIds) {
+    public BulkProfileLookupResponse bulkLookupByIds(List<UUID> userIds) {
         if (userIds == null || userIds.isEmpty()) {
             throw new IllegalArgumentException("userIds wajib diisi!");
         }
@@ -111,14 +112,14 @@ public class ProfileService {
             throw new IllegalArgumentException("userIds tidak boleh berisi null!");
         }
 
-        LinkedHashSet<Long> uniqueIds = new LinkedHashSet<>(userIds);
-        Map<Long, UserProfile> profileMap = repository.findAllById(uniqueIds).stream()
+        LinkedHashSet<UUID> uniqueIds = new LinkedHashSet<>(userIds);
+        Map<UUID, UserProfile> profileMap = repository.findAllById(uniqueIds).stream()
                 .collect(Collectors.toMap(UserProfile::getId, Function.identity()));
 
         List<UserLookupSummaryResponse> users = new ArrayList<>();
-        List<Long> notFoundIds = new ArrayList<>();
+        List<UUID> notFoundIds = new ArrayList<>();
 
-        for (Long id : uniqueIds) {
+        for (UUID id : uniqueIds) {
             UserProfile user = profileMap.get(id);
             if (user == null) {
                 notFoundIds.add(id);
@@ -130,7 +131,7 @@ public class ProfileService {
         return new BulkProfileLookupResponse(users, notFoundIds);
     }
 
-    public RoleUpgradeResponse upgradeRoleToJastiper(Long userId) {
+    public RoleUpgradeResponse upgradeRoleToJastiper(UUID userId) {
         if (userId == null) {
             throw new IllegalArgumentException("userId wajib diisi!");
         }
@@ -158,7 +159,7 @@ public class ProfileService {
         return new RoleUpgradeResponse(updated.getId(), oldRole, updated.getRole());
     }
 
-    public RoleDemoteResponse demoteRoleToTitiper(Long userId) {
+    public RoleDemoteResponse demoteRoleToTitiper(UUID userId) {
         if (userId == null) {
             throw new IllegalArgumentException("userId wajib diisi!");
         }
@@ -186,7 +187,7 @@ public class ProfileService {
         return new RoleDemoteResponse(updated.getId(), oldRole, updated.getRole());
     }
 
-    public KycDecisionResponse decideKyc(Long userId, String decision) {
+    public KycDecisionResponse decideKyc(UUID userId, String decision) {
         if (userId == null) {
             throw new IllegalArgumentException("userId wajib diisi!");
         }
@@ -231,7 +232,7 @@ public class ProfileService {
         );
     }
 
-    public JastiperStatsUpdateResponse incrementSuccessfulTransactionCount(Long userId, Long delta) {
+    public JastiperStatsUpdateResponse incrementSuccessfulTransactionCount(UUID userId, Long delta) {
         if (userId == null) {
             throw new IllegalArgumentException("userId wajib diisi!");
         }
@@ -263,7 +264,7 @@ public class ProfileService {
         return new JastiperStatsUpdateResponse(updated.getId(), oldCount, updated.getSuccessfulTransactionCount());
     }
 
-    public AccountStatusUpdateResponse updateAccountStatus(Long userId, String status) {
+    public AccountStatusUpdateResponse updateAccountStatus(UUID userId, String status) {
         if (userId == null) {
             throw new IllegalArgumentException("userId wajib diisi!");
         }

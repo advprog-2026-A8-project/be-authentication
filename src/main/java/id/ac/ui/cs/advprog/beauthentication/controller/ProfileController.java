@@ -31,6 +31,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.UUID;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.access.prepost.PreAuthorize;
 
@@ -122,7 +124,7 @@ public class ProfileController {
 
     @GetMapping("/lookup")
     public ResponseEntity<ApiResponse<PublicProfileResponse>> lookupProfile(
-            @RequestParam(required = false) Long id,
+            @RequestParam(required = false) UUID id,
             @RequestParam(required = false) String username,
             @RequestParam(required = false) String email
     ) {
