@@ -41,8 +41,11 @@ public class SecurityConfig {
                         "/api/auth/register",
                         "/api/auth/login",
                         "/api/profile/lookup",
-                        "/api/profile/jastiper"
-                    ).permitAll() // Register, login, dan public profile
+                        "/api/profile/jastiper",
+                        "/swagger-ui/**",
+                        "/swagger-ui.html",
+                        "/v3/api-docs/**"
+                    ).permitAll() // Register, login, public profile, dan Swagger UI
                         .anyRequest().authenticated() // Kunci endpoint lainnya (harus pakai token)
                 )
                 .exceptionHandling(exceptions -> exceptions
