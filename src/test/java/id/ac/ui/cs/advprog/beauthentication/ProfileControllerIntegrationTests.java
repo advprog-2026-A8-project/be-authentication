@@ -1136,7 +1136,7 @@ class ProfileControllerIntegrationTests {
         String token = jwtUtil.generateToken("titiper_test@example.com", "TITIPER");
 
         Map<String, Object> request = Map.of(
-                "userId", 1L,
+                "userId", UUID.randomUUID(),
                 "status", "BANNED"
         );
 

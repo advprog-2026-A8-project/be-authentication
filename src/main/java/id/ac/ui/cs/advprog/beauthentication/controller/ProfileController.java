@@ -143,7 +143,7 @@ public class ProfileController {
             @RequestBody BulkProfileLookupRequest request
     ) {
         try {
-            List<Long> userIds = request == null ? null : request.getUserIds();
+            List<UUID> userIds = request == null ? null : request.getUserIds();
             BulkProfileLookupResponse response = profileService.bulkLookupByIds(userIds);
             return ResponseEntity.ok(new ApiResponse<>("Bulk lookup profil berhasil!", response));
         } catch (IllegalArgumentException e) {
@@ -157,7 +157,7 @@ public class ProfileController {
             @RequestBody RoleUpgradeRequest request
     ) {
         try {
-            Long userId = request == null ? null : request.getUserId();
+            UUID userId = request == null ? null : request.getUserId();
             RoleUpgradeResponse response = profileService.upgradeRoleToJastiper(userId);
             return ResponseEntity.ok(new ApiResponse<>("Role user berhasil di-upgrade ke JASTIPER!", response));
         } catch (IllegalArgumentException e) {
@@ -173,7 +173,7 @@ public class ProfileController {
             @RequestBody RoleDemoteRequest request
     ) {
         try {
-            Long userId = request == null ? null : request.getUserId();
+            UUID userId = request == null ? null : request.getUserId();
             RoleDemoteResponse response = profileService.demoteRoleToTitiper(userId);
             return ResponseEntity.ok(new ApiResponse<>("Role user berhasil di-demote ke TITIPER!", response));
         } catch (IllegalArgumentException e) {
@@ -189,7 +189,7 @@ public class ProfileController {
             @RequestBody KycDecisionRequest request
     ) {
         try {
-            Long userId = request == null ? null : request.getUserId();
+            UUID userId = request == null ? null : request.getUserId();
             String decision = request == null ? null : request.getDecision();
             KycDecisionResponse response = profileService.decideKyc(userId, decision);
             return ResponseEntity.ok(new ApiResponse<>("Keputusan KYC berhasil diproses!", response));
@@ -206,7 +206,7 @@ public class ProfileController {
             @RequestBody JastiperStatsUpdateRequest request
     ) {
         try {
-            Long userId = request == null ? null : request.getUserId();
+            UUID userId = request == null ? null : request.getUserId();
             Long delta = request == null ? null : request.getDelta();
             JastiperStatsUpdateResponse response = profileService.incrementSuccessfulTransactionCount(userId, delta);
             return ResponseEntity.ok(new ApiResponse<>("Statistik Jastiper berhasil diperbarui!", response));
@@ -223,7 +223,7 @@ public class ProfileController {
             @RequestBody AccountStatusUpdateRequest request
     ) {
         try {
-            Long userId = request == null ? null : request.getUserId();
+            UUID userId = request == null ? null : request.getUserId();
             String status = request == null ? null : request.getStatus();
             AccountStatusUpdateResponse response = profileService.updateAccountStatus(userId, status);
             return ResponseEntity.ok(new ApiResponse<>("Status akun berhasil diperbarui!", response));
