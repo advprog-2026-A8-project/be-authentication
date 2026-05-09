@@ -132,8 +132,10 @@ class ProfileServiceUnitTests {
         UUID id2 = UUID.randomUUID();
         UserProfile u1 = buildUser("user1", "u1@e.com", UserRole.TITIPER.name(),
                 KycStatus.NOT_SUBMITTED.name(), AccountStatus.ACTIVE.name());
+        u1.setId(id1);
         UserProfile u2 = buildUser("user2", "u2@e.com", UserRole.TITIPER.name(),
                 KycStatus.NOT_SUBMITTED.name(), AccountStatus.ACTIVE.name());
+        u2.setId(id2);
         when(repository.findAllById(any())).thenReturn(List.of(u1, u2));
 
         BulkProfileLookupResponse response = profileService.bulkLookupByIds(List.of(id1, id2));
@@ -298,12 +300,8 @@ class ProfileServiceUnitTests {
 
     @Test
     void decideKyc_invalidDecision_throwsException() {
-        UUID id = UUID.randomUUID();
-        UserProfile user = titiperPending();
-        when(repository.findById(id)).thenReturn(Optional.of(user));
-
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> profileService.decideKyc(id, "INVALID"));
+                () -> profileService.decideKyc(UUID.randomUUID(), "INVALID"));
         assertEquals("decision tidak valid!", ex.getMessage());
     }
 

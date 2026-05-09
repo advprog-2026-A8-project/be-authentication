@@ -150,7 +150,6 @@ class AuthServiceUnitTests {
     void register_duplicateUsername_throwsException() {
         RegisterRequest req = validRegisterRequest();
         when(repository.findByUsername("valid_user")).thenReturn(Optional.of(new UserProfile()));
-        when(repository.findByEmail("valid@example.com")).thenReturn(Optional.empty());
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
                 () -> authService.register(req));
