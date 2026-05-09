@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,6 +32,12 @@ public class ProfileService {
 
     private static final String KYC_APPROVE = "APPROVE";
     private static final String KYC_REJECT = "REJECT";
+
+    private static final Pattern PHONE_PATTERN =
+            Pattern.compile("^\\+?[0-9]{8,15}$");
+
+    private static final Pattern URL_PATTERN =
+            Pattern.compile("^https?://.+");
 
     @Autowired
     private UserProfileRepository repository;
@@ -327,7 +334,11 @@ public class ProfileService {
         }
 
         if (request.getPhoneNumber() != null) {
-            currentUser.setPhoneNumber(request.getPhoneNumber().trim());
+            String trimmedPhone = request.getPhoneNumber().trim();
+            if (!trimmedPhone.isBlank() && !PHONE_PATTERN.matcher(trimmedPhone).matches()) {
+                throw new IllegalArgumentException("Nomor telepon tidak valid!");
+            }
+            currentUser.setPhoneNumber(trimmedPhone);
         }
 
         if (request.getBio() != null) {
@@ -346,6 +357,14 @@ public class ProfileService {
                 || isBlank(request.getIdentityDocumentUrl())
                 || isBlank(request.getSocialMediaUrl())) {
             throw new IllegalArgumentException("fullName, identityDocumentUrl, dan socialMediaUrl wajib diisi!");
+        }
+
+        if (!URL_PATTERN.matcher(request.getIdentityDocumentUrl().trim()).matches()) {
+            throw new IllegalArgumentException("URL harus diawali dengan http:// atau https://");
+        }
+
+        if (!URL_PATTERN.matcher(request.getSocialMediaUrl().trim()).matches()) {
+            throw new IllegalArgumentException("URL harus diawali dengan http:// atau https://");
         }
 
         UserProfile currentUser = getByPrincipal(principalIdentifier);

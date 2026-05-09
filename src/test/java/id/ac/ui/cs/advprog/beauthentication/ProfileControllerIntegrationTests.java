@@ -211,6 +211,41 @@ class ProfileControllerIntegrationTests {
     }
 
     @Test
+    void shouldRejectUpdateProfileWithInvalidPhoneNumber() throws Exception {
+        String token = registerAndLogin("invalid_phone_user", "invalid_phone_user@example.com", "Password123!");
+
+        Map<String, String> updateRequest = Map.of(
+                "fullName", "Invalid Phone",
+                "phoneNumber", "abc-def"
+        );
+
+        mockMvc.perform(put("/api/profile/me")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Nomor telepon tidak valid!"));
+    }
+
+    @Test
+    void shouldRejectKycSubmissionWithInvalidDocumentUrl() throws Exception {
+        String token = registerAndLogin("invalid_url_user", "invalid_url_user@example.com", "Password123!");
+
+        Map<String, String> kycRequest = Map.of(
+                "fullName", "Budi Santoso",
+                "identityDocumentUrl", "bukan-url-valid",
+                "socialMediaUrl", "https://instagram.com/budi"
+        );
+
+        mockMvc.perform(post("/api/profile/kyc/submit")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(kycRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("URL harus diawali dengan http:// atau https://"));
+    }
+
+    @Test
     void shouldRejectProfileUpdateWhenUsernameAlreadyUsed() throws Exception {
         registerAndLogin("first_user", "first_user@example.com", "Password123!");
         String secondToken = registerAndLogin("second_user", "second_user@example.com", "Password123!");
