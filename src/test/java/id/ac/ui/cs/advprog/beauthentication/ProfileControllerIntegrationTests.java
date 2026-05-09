@@ -76,7 +76,7 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldGetMyProfileSuccessfully() throws Exception {
-        String token = registerAndLogin("profile_user", "profile_user@example.com", "password123");
+        String token = registerAndLogin("profile_user", "profile_user@example.com", "Password123!");
 
         mockMvc.perform(get("/api/profile/me")
                         .header("Authorization", "Bearer " + token))
@@ -91,7 +91,7 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldUpdateMyProfileSuccessfully() throws Exception {
-        String token = registerAndLogin("editable_user", "editable_user@example.com", "password123");
+        String token = registerAndLogin("editable_user", "editable_user@example.com", "Password123!");
 
         Map<String, String> updateRequest = Map.of(
                 "username", "updated_user",
@@ -114,7 +114,7 @@ class ProfileControllerIntegrationTests {
 
         @Test
         void shouldSubmitKycSuccessfullyWithBasicData() throws Exception {
-        String token = registerAndLogin("kyc_user", "kyc_user@example.com", "password123");
+        String token = registerAndLogin("kyc_user", "kyc_user@example.com", "Password123!");
 
         Map<String, String> request = Map.of(
                 "fullName", "Budi Santoso",
@@ -136,7 +136,7 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldRejectKycSubmissionWhenFieldsMissing() throws Exception {
-        String token = registerAndLogin("kyc_missing", "kyc_missing@example.com", "password123");
+        String token = registerAndLogin("kyc_missing", "kyc_missing@example.com", "Password123!");
 
         Map<String, String> request = Map.of(
                 "fullName", "Budi Santoso"
@@ -152,7 +152,7 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldRejectUpdateProfileWhenFullNameBlank() throws Exception {
-        String token = registerAndLogin("blank_fullname", "blank_fullname@example.com", "password123");
+        String token = registerAndLogin("blank_fullname", "blank_fullname@example.com", "Password123!");
 
         Map<String, String> updateRequest = Map.of(
                 "fullName", "   "
@@ -168,7 +168,7 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldRejectUpdateProfileWhenFullNameMissingAndNotSet() throws Exception {
-        String token = registerAndLogin("missing_fullname", "missing_fullname@example.com", "password123");
+        String token = registerAndLogin("missing_fullname", "missing_fullname@example.com", "Password123!");
 
         Map<String, String> updateRequest = Map.of(
                 "phoneNumber", "08123456789"
@@ -184,7 +184,7 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldAllowUpdateWithoutFullNameWhenAlreadySet() throws Exception {
-        String token = registerAndLogin("full_name_set", "full_name_set@example.com", "password123");
+        String token = registerAndLogin("full_name_set", "full_name_set@example.com", "Password123!");
 
         Map<String, String> initialUpdate = Map.of(
                 "fullName", "Nama Awal"
@@ -212,8 +212,8 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldRejectProfileUpdateWhenUsernameAlreadyUsed() throws Exception {
-        registerAndLogin("first_user", "first_user@example.com", "password123");
-        String secondToken = registerAndLogin("second_user", "second_user@example.com", "password123");
+        registerAndLogin("first_user", "first_user@example.com", "Password123!");
+        String secondToken = registerAndLogin("second_user", "second_user@example.com", "Password123!");
 
         Map<String, String> updateRequest = Map.of(
                 "username", "first_user",
@@ -230,7 +230,7 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldKeepUsernameWhenBlankUsernameProvidedInUpdate() throws Exception {
-        String token = registerAndLogin("stable_user", "stable_user@example.com", "password123");
+        String token = registerAndLogin("stable_user", "stable_user@example.com", "Password123!");
 
         Map<String, String> updateRequest = Map.of(
                 "username", "   ",
@@ -248,7 +248,7 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldStillAccessProfileWithSameTokenAfterUsernameChange() throws Exception {
-        String token = registerAndLogin("token_stable_user", "token_stable_user@example.com", "password123");
+        String token = registerAndLogin("token_stable_user", "token_stable_user@example.com", "Password123!");
 
         Map<String, String> updateRequest = Map.of(
                 "username", "token_stable_user_updated",
@@ -278,7 +278,7 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldLookupProfileByEmailSuccessfully() throws Exception {
-        String token = registerAndLogin("lookup_user", "lookup_user@example.com", "password123");
+        String token = registerAndLogin("lookup_user", "lookup_user@example.com", "Password123!");
 
         mockMvc.perform(get("/api/profile/lookup")
                         .header("Authorization", "Bearer " + token)
@@ -291,7 +291,7 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldLookupProfileByIdSuccessfully() throws Exception {
-        String token = registerAndLogin("lookup_id_user", "lookup_id_user@example.com", "password123");
+        String token = registerAndLogin("lookup_id_user", "lookup_id_user@example.com", "Password123!");
 
         UUID userId = userProfileRepository.findByEmail("lookup_id_user@example.com")
                 .orElseThrow(() -> new AssertionError("User lookup_id_user harus ada")).getId();
@@ -307,7 +307,7 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldLookupProfileByUsernameSuccessfully() throws Exception {
-        String token = registerAndLogin("lookup_username_user", "lookup_username_user@example.com", "password123");
+        String token = registerAndLogin("lookup_username_user", "lookup_username_user@example.com", "Password123!");
 
         mockMvc.perform(get("/api/profile/lookup")
                         .header("Authorization", "Bearer " + token)
@@ -320,7 +320,7 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldRejectLookupProfileWithoutIdentifier() throws Exception {
-        String token = registerAndLogin("lookup_req_user", "lookup_req_user@example.com", "password123");
+        String token = registerAndLogin("lookup_req_user", "lookup_req_user@example.com", "Password123!");
 
         mockMvc.perform(get("/api/profile/lookup")
                         .header("Authorization", "Bearer " + token))
@@ -330,7 +330,7 @@ class ProfileControllerIntegrationTests {
 
         @Test
         void shouldRejectLookupProfileWhenMultipleIdentifiersProvided() throws Exception {
-                String token = registerAndLogin("lookup_multi_user", "lookup_multi_user@example.com", "password123");
+                String token = registerAndLogin("lookup_multi_user", "lookup_multi_user@example.com", "Password123!");
 
                 mockMvc.perform(get("/api/profile/lookup")
                                                 .header("Authorization", "Bearer " + token)
@@ -342,7 +342,7 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldReturnNotFoundWhenLookupProfileDoesNotExist() throws Exception {
-        String token = registerAndLogin("lookup_nf_user", "lookup_nf_user@example.com", "password123");
+        String token = registerAndLogin("lookup_nf_user", "lookup_nf_user@example.com", "Password123!");
 
         mockMvc.perform(get("/api/profile/lookup")
                         .header("Authorization", "Bearer " + token)
@@ -371,8 +371,8 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldBulkLookupProfilesSuccessfully() throws Exception {
-        String token = registerAndLogin("bulk_one", "bulk_one@example.com", "password123");
-        registerAndLogin("bulk_two", "bulk_two@example.com", "password123");
+        String token = registerAndLogin("bulk_one", "bulk_one@example.com", "Password123!");
+        registerAndLogin("bulk_two", "bulk_two@example.com", "Password123!");
 
         UUID firstId = userProfileRepository.findByEmail("bulk_one@example.com")
                 .orElseThrow(() -> new AssertionError("User bulk_one harus ada")).getId();
@@ -400,7 +400,7 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldRejectBulkLookupWhenUserIdsEmpty() throws Exception {
-        String token = registerAndLogin("bulk_empty", "bulk_empty@example.com", "password123");
+        String token = registerAndLogin("bulk_empty", "bulk_empty@example.com", "Password123!");
 
         Map<String, Object> request = Map.of(
                 "userIds", List.of()
@@ -416,7 +416,7 @@ class ProfileControllerIntegrationTests {
 
         @Test
         void shouldRejectBulkLookupWhenUserIdsContainsNull() throws Exception {
-                String token = registerAndLogin("bulk_null", "bulk_null@example.com", "password123");
+                String token = registerAndLogin("bulk_null", "bulk_null@example.com", "Password123!");
 
                 mockMvc.perform(post("/api/profile/lookup/bulk")
                                                 .header("Authorization", "Bearer " + token)
@@ -441,7 +441,7 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldAllowAdminToUpgradeRoleToJastiper() throws Exception {
-        registerAndLogin("upgrade_target", "upgrade_target@example.com", "password123");
+        registerAndLogin("upgrade_target", "upgrade_target@example.com", "Password123!");
         UserProfile targetUser = userProfileRepository.findByEmail("upgrade_target@example.com")
                 .orElseThrow(() -> new AssertionError("User target harus ada"));
         UUID targetUserId = targetUser.getId();
@@ -997,7 +997,7 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldRejectRoleUpgradeForNonAdmin() throws Exception {
-        registerAndLogin("upgrade_non_admin", "upgrade_non_admin@example.com", "password123");
+        registerAndLogin("upgrade_non_admin", "upgrade_non_admin@example.com", "Password123!");
         UUID targetUserId = userProfileRepository.findByEmail("upgrade_non_admin@example.com")
                 .orElseThrow(() -> new AssertionError("User target harus ada")).getId();
 
@@ -1182,7 +1182,7 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldGetOnlyJastiperProfiles() throws Exception {
-        String token = registerAndLogin("viewer_user", "viewer_user@example.com", "password123");
+        String token = registerAndLogin("viewer_user", "viewer_user@example.com", "Password123!");
 
         UserProfile jastiper = new UserProfile();
         jastiper.setUsername("jastiper_one");
@@ -1226,7 +1226,7 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldSubmitKycSuccessfully() throws Exception {
-        String token = registerAndLogin("kyc_user", "kyc_user@example.com", "password123");
+        String token = registerAndLogin("kyc_user", "kyc_user@example.com", "Password123!");
 
         Map<String, String> kycRequest = Map.of(
                 "fullName", "KYC User",
@@ -1248,7 +1248,7 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldRejectKycSubmitWithInvalidPayload() throws Exception {
-        String token = registerAndLogin("kyc_invalid_user", "kyc_invalid_user@example.com", "password123");
+        String token = registerAndLogin("kyc_invalid_user", "kyc_invalid_user@example.com", "Password123!");
 
         Map<String, String> invalidKycRequest = Map.of(
                 "fullName", "",
@@ -1281,7 +1281,7 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldNotExposeKycDocumentUrlsInProfileList() throws Exception {
-        String token = registerAndLogin("list_user", "list_user@example.com", "password123");
+        String token = registerAndLogin("list_user", "list_user@example.com", "Password123!");
 
         Map<String, String> kycRequest = Map.of(
                 "fullName", "List User",
@@ -1310,7 +1310,7 @@ class ProfileControllerIntegrationTests {
     void shouldCompleteMilestone50FlowEndToEnd() throws Exception {
         Map<String, String> registerRequest = Map.of(
                 "email", "milestone50@example.com",
-                "password", "password123"
+                "password", "Password123!"
         );
 
         MvcResult registerResult = mockMvc.perform(post("/api/auth/register")
@@ -1327,7 +1327,7 @@ class ProfileControllerIntegrationTests {
 
         Map<String, String> loginRequest = Map.of(
                 "email", "milestone50@example.com",
-                "password", "password123"
+                "password", "Password123!"
         );
 
         MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
@@ -1377,7 +1377,7 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldPersistProfileUpdateInDatabase() throws Exception {
-        String token = registerAndLogin("db_profile_user", "db_profile_user@example.com", "password123");
+        String token = registerAndLogin("db_profile_user", "db_profile_user@example.com", "Password123!");
 
         Map<String, String> updateRequest = Map.of(
                 "fullName", "Persisted Profile",
@@ -1401,7 +1401,7 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldPersistKycDataInDatabase() throws Exception {
-        String token = registerAndLogin("db_kyc_user", "db_kyc_user@example.com", "password123");
+        String token = registerAndLogin("db_kyc_user", "db_kyc_user@example.com", "Password123!");
 
         Map<String, String> kycRequest = Map.of(
                 "fullName", "Persisted KYC User",
@@ -1543,7 +1543,7 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldSetAccountStatusToPendingAfterKycSubmission() throws Exception {
-        String token = registerAndLogin("kyc_status_check", "kyc_status_check@example.com", "password123");
+        String token = registerAndLogin("kyc_status_check", "kyc_status_check@example.com", "Password123!");
 
         Map<String, String> kycRequest = Map.of(
                 "fullName", "Status Check User",
@@ -1620,7 +1620,7 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldRejectKycResubmissionWhenAlreadyApproved() throws Exception {
-        String token = registerAndLogin("kyc_resubmit", "kyc_resubmit@example.com", "password123");
+        String token = registerAndLogin("kyc_resubmit", "kyc_resubmit@example.com", "Password123!");
 
         UserProfile user = userProfileRepository.findByEmail("kyc_resubmit@example.com")
                 .orElseThrow(() -> new AssertionError("User harus ada"));
