@@ -94,4 +94,17 @@ class JwtUtilTests {
         String token = jwtUtil.generateToken("user@example.com");
         assertTrue(jwtUtil.extractExpiration(token).after(new Date()));
     }
+
+    @Test
+    void generateToken_withUserId_canExtractUserId() {
+        String userId = "550e8400-e29b-41d4-a716-446655440000";
+        String token = jwtUtil.generateToken("user@example.com", "TITIPER", userId);
+        assertEquals(userId, jwtUtil.extractUserId(token));
+    }
+
+    @Test
+    void extractUserId_noUserIdClaim_returnsNull() {
+        String token = jwtUtil.generateToken("user@example.com", "TITIPER");
+        assertNull(jwtUtil.extractUserId(token));
+    }
 }

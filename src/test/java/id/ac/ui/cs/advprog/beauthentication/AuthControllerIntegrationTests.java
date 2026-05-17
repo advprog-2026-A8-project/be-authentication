@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.Map;
+import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -263,6 +264,10 @@ class AuthControllerIntegrationTests {
 
         Assertions.assertEquals("TITIPER", jwtUtil.extractRole(token));
         Assertions.assertEquals("login_user@example.com", jwtUtil.extractUsername(token));
+
+        String userId = jwtUtil.extractUserId(token);
+        Assertions.assertNotNull(userId);
+        Assertions.assertDoesNotThrow(() -> UUID.fromString(userId));
     }
 
     @Test
