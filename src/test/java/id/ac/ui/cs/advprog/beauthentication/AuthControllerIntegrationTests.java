@@ -257,6 +257,8 @@ class AuthControllerIntegrationTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Login berhasil!"))
                 .andExpect(jsonPath("$.data.token").isString())
+                .andExpect(jsonPath("$.data.userId").isString())
+                .andExpect(jsonPath("$.data.role").value("TITIPER"))
                 .andReturn();
 
         String token = objectMapper.readTree(loginResult.getResponse().getContentAsString())
@@ -268,6 +270,11 @@ class AuthControllerIntegrationTests {
         String userId = jwtUtil.extractUserId(token);
         Assertions.assertNotNull(userId);
         Assertions.assertDoesNotThrow(() -> UUID.fromString(userId));
+
+        String responseUserId = objectMapper.readTree(loginResult.getResponse().getContentAsString())
+                .path("data").path("userId").asText();
+        Assertions.assertDoesNotThrow(() -> UUID.fromString(responseUserId));
+        Assertions.assertEquals(userId, responseUserId);
     }
 
     @Test
