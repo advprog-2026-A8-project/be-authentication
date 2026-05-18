@@ -1460,6 +1460,54 @@ class ProfileControllerIntegrationTests {
     }
 
     // =====================================================================
+    // New tests: KYC decision aliases (APPROVED/REJECTED)
+    // =====================================================================
+
+    @Test
+    void shouldAllowAdminToApproveKycUsingApprovedAlias() throws Exception {
+        UserProfile target = new UserProfile();
+        target.setUsername("kyc_approved_alias");
+        target.setEmail("kyc_approved_alias@example.com");
+        target.setPassword("dummy");
+        target.setRole(UserRole.TITIPER.name());
+        target.setKycStatus("PENDING");
+        UserProfile saved = userProfileRepository.save(target);
+
+        String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+        Map<String, Object> request = Map.of("userId", saved.getId(), "decision", "APPROVED");
+
+        mockMvc.perform(put("/api/profile/admin/kyc/decision")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.newKycStatus").value("APPROVED"))
+                .andExpect(jsonPath("$.data.newRole").value("JASTIPER"));
+    }
+
+    @Test
+    void shouldAllowAdminToRejectKycUsingRejectedAlias() throws Exception {
+        UserProfile target = new UserProfile();
+        target.setUsername("kyc_rejected_alias");
+        target.setEmail("kyc_rejected_alias@example.com");
+        target.setPassword("dummy");
+        target.setRole(UserRole.TITIPER.name());
+        target.setKycStatus("PENDING");
+        UserProfile saved = userProfileRepository.save(target);
+
+        String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+        Map<String, Object> request = Map.of("userId", saved.getId(), "decision", "REJECTED");
+
+        mockMvc.perform(put("/api/profile/admin/kyc/decision")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.newKycStatus").value("REJECTED"))
+                .andExpect(jsonPath("$.data.newRole").value("TITIPER"));
+    }
+
+    // =====================================================================
     // New tests: KYC decision guard (Bug 3)
     // =====================================================================
 

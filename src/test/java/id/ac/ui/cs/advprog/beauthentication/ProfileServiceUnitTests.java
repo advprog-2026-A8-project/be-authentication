@@ -363,6 +363,32 @@ class ProfileServiceUnitTests {
         assertEquals(AccountStatus.ACTIVE.name(), user.getAccountStatus());
     }
 
+    @Test
+    void decideKyc_approvedAlias_worksLikeApprove() {
+        UUID id = UUID.randomUUID();
+        UserProfile user = titiperPending();
+        when(repository.findById(id)).thenReturn(Optional.of(user));
+        when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        KycDecisionResponse response = profileService.decideKyc(id, "APPROVED");
+
+        assertEquals(KycStatus.APPROVED.name(), response.getNewKycStatus());
+        assertEquals(UserRole.JASTIPER.name(), response.getNewRole());
+    }
+
+    @Test
+    void decideKyc_rejectedAlias_worksLikeReject() {
+        UUID id = UUID.randomUUID();
+        UserProfile user = titiperPending();
+        when(repository.findById(id)).thenReturn(Optional.of(user));
+        when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        KycDecisionResponse response = profileService.decideKyc(id, "REJECTED");
+
+        assertEquals(KycStatus.REJECTED.name(), response.getNewKycStatus());
+        assertEquals(UserRole.TITIPER.name(), response.getNewRole());
+    }
+
     // ===================== incrementSuccessfulTransactionCount =====================
 
     @Test

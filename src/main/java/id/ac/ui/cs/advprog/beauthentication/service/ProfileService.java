@@ -32,6 +32,8 @@ public class ProfileService {
 
     private static final String KYC_APPROVE = "APPROVE";
     private static final String KYC_REJECT = "REJECT";
+    private static final String KYC_APPROVED = "APPROVED";
+    private static final String KYC_REJECTED = "REJECTED";
 
     private static final Pattern PHONE_PATTERN =
             Pattern.compile("^\\+?[0-9]{8,15}$");
@@ -204,6 +206,12 @@ public class ProfileService {
         }
 
         String normalizedDecision = decision.trim().toUpperCase(Locale.ROOT);
+        if (KYC_APPROVED.equals(normalizedDecision)) {
+            normalizedDecision = KYC_APPROVE;
+        } else if (KYC_REJECTED.equals(normalizedDecision)) {
+            normalizedDecision = KYC_REJECT;
+        }
+
         if (!KYC_APPROVE.equals(normalizedDecision) && !KYC_REJECT.equals(normalizedDecision)) {
             throw new IllegalArgumentException("decision tidak valid!");
         }
