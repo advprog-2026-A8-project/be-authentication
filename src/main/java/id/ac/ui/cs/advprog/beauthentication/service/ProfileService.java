@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
-public class ProfileService {
+public class ProfileService implements IProfileService {
 
     private static final String KYC_APPROVE = "APPROVE";
     private static final String KYC_REJECT = "REJECT";

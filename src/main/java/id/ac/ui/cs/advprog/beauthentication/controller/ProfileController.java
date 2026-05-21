@@ -20,7 +20,7 @@ import id.ac.ui.cs.advprog.beauthentication.dto.RoleUpgradeResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.UpdateProfileRequest;
 import id.ac.ui.cs.advprog.beauthentication.model.UserProfile;
 import id.ac.ui.cs.advprog.beauthentication.repository.UserProfileRepository;
-import id.ac.ui.cs.advprog.beauthentication.service.ProfileService;
+import id.ac.ui.cs.advprog.beauthentication.service.IProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,7 +46,7 @@ public class ProfileController {
     private UserProfileRepository repository;
 
     @Autowired
-    private ProfileService profileService;
+    private IProfileService profileService;
 
     private ProfileResponse toProfileResponse(UserProfile user) {
         return new ProfileResponse(
