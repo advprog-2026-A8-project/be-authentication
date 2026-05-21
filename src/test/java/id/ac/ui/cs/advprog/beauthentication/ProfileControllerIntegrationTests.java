@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -75,7 +76,7 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldGetMyProfileSuccessfully() throws Exception {
-        String token = registerAndLogin("profile_user", "profile_user@example.com", "password123");
+        String token = registerAndLogin("profile_user", "profile_user@example.com", "Password123!");
 
         mockMvc.perform(get("/api/profile/me")
                         .header("Authorization", "Bearer " + token))
@@ -84,13 +85,13 @@ class ProfileControllerIntegrationTests {
                 .andExpect(jsonPath("$.data.username").value("profile_user"))
                 .andExpect(jsonPath("$.data.email").value("profile_user@example.com"))
                 .andExpect(jsonPath("$.data.role").value("TITIPER"))
-                                .andExpect(jsonPath("$.data.kycStatus").value("PENDING"))
+                                .andExpect(jsonPath("$.data.kycStatus").value("NOT_SUBMITTED"))
                                 .andExpect(jsonPath("$.data.successfulTransactionCount").value(0));
     }
 
     @Test
     void shouldUpdateMyProfileSuccessfully() throws Exception {
-        String token = registerAndLogin("editable_user", "editable_user@example.com", "password123");
+        String token = registerAndLogin("editable_user", "editable_user@example.com", "Password123!");
 
         Map<String, String> updateRequest = Map.of(
                 "username", "updated_user",
@@ -113,7 +114,7 @@ class ProfileControllerIntegrationTests {
 
         @Test
         void shouldSubmitKycSuccessfullyWithBasicData() throws Exception {
-        String token = registerAndLogin("kyc_user", "kyc_user@example.com", "password123");
+        String token = registerAndLogin("kyc_user", "kyc_user@example.com", "Password123!");
 
         Map<String, String> request = Map.of(
                 "fullName", "Budi Santoso",
@@ -135,7 +136,7 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldRejectKycSubmissionWhenFieldsMissing() throws Exception {
-        String token = registerAndLogin("kyc_missing", "kyc_missing@example.com", "password123");
+        String token = registerAndLogin("kyc_missing", "kyc_missing@example.com", "Password123!");
 
         Map<String, String> request = Map.of(
                 "fullName", "Budi Santoso"
@@ -151,7 +152,7 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldRejectUpdateProfileWhenFullNameBlank() throws Exception {
-        String token = registerAndLogin("blank_fullname", "blank_fullname@example.com", "password123");
+        String token = registerAndLogin("blank_fullname", "blank_fullname@example.com", "Password123!");
 
         Map<String, String> updateRequest = Map.of(
                 "fullName", "   "
@@ -167,7 +168,7 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldRejectUpdateProfileWhenFullNameMissingAndNotSet() throws Exception {
-        String token = registerAndLogin("missing_fullname", "missing_fullname@example.com", "password123");
+        String token = registerAndLogin("missing_fullname", "missing_fullname@example.com", "Password123!");
 
         Map<String, String> updateRequest = Map.of(
                 "phoneNumber", "08123456789"
@@ -183,7 +184,7 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldAllowUpdateWithoutFullNameWhenAlreadySet() throws Exception {
-        String token = registerAndLogin("full_name_set", "full_name_set@example.com", "password123");
+        String token = registerAndLogin("full_name_set", "full_name_set@example.com", "Password123!");
 
         Map<String, String> initialUpdate = Map.of(
                 "fullName", "Nama Awal"
@@ -210,9 +211,44 @@ class ProfileControllerIntegrationTests {
     }
 
     @Test
+    void shouldRejectUpdateProfileWithInvalidPhoneNumber() throws Exception {
+        String token = registerAndLogin("invalid_phone_user", "invalid_phone_user@example.com", "Password123!");
+
+        Map<String, String> updateRequest = Map.of(
+                "fullName", "Invalid Phone",
+                "phoneNumber", "abc-def"
+        );
+
+        mockMvc.perform(put("/api/profile/me")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Nomor telepon tidak valid!"));
+    }
+
+    @Test
+    void shouldRejectKycSubmissionWithInvalidDocumentUrl() throws Exception {
+        String token = registerAndLogin("invalid_url_user", "invalid_url_user@example.com", "Password123!");
+
+        Map<String, String> kycRequest = Map.of(
+                "fullName", "Budi Santoso",
+                "identityDocumentUrl", "bukan-url-valid",
+                "socialMediaUrl", "https://instagram.com/budi"
+        );
+
+        mockMvc.perform(post("/api/profile/kyc/submit")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(kycRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("URL harus diawali dengan http:// atau https://"));
+    }
+
+    @Test
     void shouldRejectProfileUpdateWhenUsernameAlreadyUsed() throws Exception {
-        registerAndLogin("first_user", "first_user@example.com", "password123");
-        String secondToken = registerAndLogin("second_user", "second_user@example.com", "password123");
+        registerAndLogin("first_user", "first_user@example.com", "Password123!");
+        String secondToken = registerAndLogin("second_user", "second_user@example.com", "Password123!");
 
         Map<String, String> updateRequest = Map.of(
                 "username", "first_user",
@@ -229,7 +265,7 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldKeepUsernameWhenBlankUsernameProvidedInUpdate() throws Exception {
-        String token = registerAndLogin("stable_user", "stable_user@example.com", "password123");
+        String token = registerAndLogin("stable_user", "stable_user@example.com", "Password123!");
 
         Map<String, String> updateRequest = Map.of(
                 "username", "   ",
@@ -247,7 +283,7 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldStillAccessProfileWithSameTokenAfterUsernameChange() throws Exception {
-        String token = registerAndLogin("token_stable_user", "token_stable_user@example.com", "password123");
+        String token = registerAndLogin("token_stable_user", "token_stable_user@example.com", "Password123!");
 
         Map<String, String> updateRequest = Map.of(
                 "username", "token_stable_user_updated",
@@ -277,7 +313,7 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldLookupProfileByEmailSuccessfully() throws Exception {
-        String token = registerAndLogin("lookup_user", "lookup_user@example.com", "password123");
+        String token = registerAndLogin("lookup_user", "lookup_user@example.com", "Password123!");
 
         mockMvc.perform(get("/api/profile/lookup")
                         .header("Authorization", "Bearer " + token)
@@ -285,28 +321,28 @@ class ProfileControllerIntegrationTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Profil berhasil ditemukan!"))
                 .andExpect(jsonPath("$.data.username").value("lookup_user"))
-                .andExpect(jsonPath("$.data.email").value("lookup_user@example.com"));
+                .andExpect(jsonPath("$.data.email").doesNotExist());
     }
 
     @Test
     void shouldLookupProfileByIdSuccessfully() throws Exception {
-        String token = registerAndLogin("lookup_id_user", "lookup_id_user@example.com", "password123");
+        String token = registerAndLogin("lookup_id_user", "lookup_id_user@example.com", "Password123!");
 
-        Long userId = userProfileRepository.findByEmail("lookup_id_user@example.com")
+        UUID userId = userProfileRepository.findByEmail("lookup_id_user@example.com")
                 .orElseThrow(() -> new AssertionError("User lookup_id_user harus ada")).getId();
 
         mockMvc.perform(get("/api/profile/lookup")
                         .header("Authorization", "Bearer " + token)
-                        .param("id", String.valueOf(userId)))
+                        .param("id", userId.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Profil berhasil ditemukan!"))
-                .andExpect(jsonPath("$.data.id").value(userId))
-                .andExpect(jsonPath("$.data.email").value("lookup_id_user@example.com"));
+                .andExpect(jsonPath("$.data.id").value(userId.toString()))
+                .andExpect(jsonPath("$.data.email").doesNotExist());
     }
 
     @Test
     void shouldLookupProfileByUsernameSuccessfully() throws Exception {
-        String token = registerAndLogin("lookup_username_user", "lookup_username_user@example.com", "password123");
+        String token = registerAndLogin("lookup_username_user", "lookup_username_user@example.com", "Password123!");
 
         mockMvc.perform(get("/api/profile/lookup")
                         .header("Authorization", "Bearer " + token)
@@ -314,12 +350,12 @@ class ProfileControllerIntegrationTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Profil berhasil ditemukan!"))
                 .andExpect(jsonPath("$.data.username").value("lookup_username_user"))
-                .andExpect(jsonPath("$.data.email").value("lookup_username_user@example.com"));
+                .andExpect(jsonPath("$.data.email").doesNotExist());
     }
 
     @Test
     void shouldRejectLookupProfileWithoutIdentifier() throws Exception {
-        String token = registerAndLogin("lookup_req_user", "lookup_req_user@example.com", "password123");
+        String token = registerAndLogin("lookup_req_user", "lookup_req_user@example.com", "Password123!");
 
         mockMvc.perform(get("/api/profile/lookup")
                         .header("Authorization", "Bearer " + token))
@@ -329,7 +365,7 @@ class ProfileControllerIntegrationTests {
 
         @Test
         void shouldRejectLookupProfileWhenMultipleIdentifiersProvided() throws Exception {
-                String token = registerAndLogin("lookup_multi_user", "lookup_multi_user@example.com", "password123");
+                String token = registerAndLogin("lookup_multi_user", "lookup_multi_user@example.com", "Password123!");
 
                 mockMvc.perform(get("/api/profile/lookup")
                                                 .header("Authorization", "Bearer " + token)
@@ -341,7 +377,7 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldReturnNotFoundWhenLookupProfileDoesNotExist() throws Exception {
-        String token = registerAndLogin("lookup_nf_user", "lookup_nf_user@example.com", "password123");
+        String token = registerAndLogin("lookup_nf_user", "lookup_nf_user@example.com", "Password123!");
 
         mockMvc.perform(get("/api/profile/lookup")
                         .header("Authorization", "Bearer " + token)
@@ -370,16 +406,17 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldBulkLookupProfilesSuccessfully() throws Exception {
-        String token = registerAndLogin("bulk_one", "bulk_one@example.com", "password123");
-        registerAndLogin("bulk_two", "bulk_two@example.com", "password123");
+        String token = registerAndLogin("bulk_one", "bulk_one@example.com", "Password123!");
+        registerAndLogin("bulk_two", "bulk_two@example.com", "Password123!");
 
-        Long firstId = userProfileRepository.findByEmail("bulk_one@example.com")
+        UUID firstId = userProfileRepository.findByEmail("bulk_one@example.com")
                 .orElseThrow(() -> new AssertionError("User bulk_one harus ada")).getId();
-        Long secondId = userProfileRepository.findByEmail("bulk_two@example.com")
+        UUID secondId = userProfileRepository.findByEmail("bulk_two@example.com")
                 .orElseThrow(() -> new AssertionError("User bulk_two harus ada")).getId();
+        UUID nonExistentId = UUID.randomUUID();
 
         Map<String, Object> request = Map.of(
-                "userIds", List.of(firstId, 999999L, secondId)
+                "userIds", List.of(firstId, nonExistentId, secondId)
         );
 
         mockMvc.perform(post("/api/profile/lookup/bulk")
@@ -389,16 +426,16 @@ class ProfileControllerIntegrationTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Bulk lookup profil berhasil!"))
                 .andExpect(jsonPath("$.data.users.length()").value(2))
-                .andExpect(jsonPath("$.data.users[0].id").value(firstId))
+                .andExpect(jsonPath("$.data.users[0].id").value(firstId.toString()))
                 .andExpect(jsonPath("$.data.users[0].role").value("TITIPER"))
-                .andExpect(jsonPath("$.data.users[1].id").value(secondId))
+                .andExpect(jsonPath("$.data.users[1].id").value(secondId.toString()))
                 .andExpect(jsonPath("$.data.notFoundIds.length()").value(1))
-                .andExpect(jsonPath("$.data.notFoundIds[0]").value(999999));
+                .andExpect(jsonPath("$.data.notFoundIds[0]").value(nonExistentId.toString()));
     }
 
     @Test
     void shouldRejectBulkLookupWhenUserIdsEmpty() throws Exception {
-        String token = registerAndLogin("bulk_empty", "bulk_empty@example.com", "password123");
+        String token = registerAndLogin("bulk_empty", "bulk_empty@example.com", "Password123!");
 
         Map<String, Object> request = Map.of(
                 "userIds", List.of()
@@ -414,12 +451,12 @@ class ProfileControllerIntegrationTests {
 
         @Test
         void shouldRejectBulkLookupWhenUserIdsContainsNull() throws Exception {
-                String token = registerAndLogin("bulk_null", "bulk_null@example.com", "password123");
+                String token = registerAndLogin("bulk_null", "bulk_null@example.com", "Password123!");
 
                 mockMvc.perform(post("/api/profile/lookup/bulk")
                                                 .header("Authorization", "Bearer " + token)
                                                 .contentType(MediaType.APPLICATION_JSON)
-                                                .content("{\"userIds\":[1,null,2]}"))
+                                                .content("{\"userIds\":[\"" + UUID.randomUUID() + "\",null,\"" + UUID.randomUUID() + "\"]}"))
                                 .andExpect(status().isBadRequest())
                                 .andExpect(jsonPath("$.message").value("userIds tidak boleh berisi null!"));
         }
@@ -439,9 +476,13 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldAllowAdminToUpgradeRoleToJastiper() throws Exception {
-        registerAndLogin("upgrade_target", "upgrade_target@example.com", "password123");
-        Long targetUserId = userProfileRepository.findByEmail("upgrade_target@example.com")
-                .orElseThrow(() -> new AssertionError("User target harus ada")).getId();
+        registerAndLogin("upgrade_target", "upgrade_target@example.com", "Password123!");
+        UserProfile targetUser = userProfileRepository.findByEmail("upgrade_target@example.com")
+                .orElseThrow(() -> new AssertionError("User target harus ada"));
+        UUID targetUserId = targetUser.getId();
+
+        targetUser.setKycStatus("APPROVED");
+        userProfileRepository.save(targetUser);
 
         String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
 
@@ -453,7 +494,7 @@ class ProfileControllerIntegrationTests {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Role user berhasil di-upgrade ke JASTIPER!"))
-                .andExpect(jsonPath("$.data.userId").value(targetUserId))
+                .andExpect(jsonPath("$.data.userId").value(targetUserId.toString()))
                 .andExpect(jsonPath("$.data.oldRole").value("TITIPER"))
                 .andExpect(jsonPath("$.data.newRole").value("JASTIPER"));
 
@@ -485,7 +526,7 @@ class ProfileControllerIntegrationTests {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Keputusan KYC berhasil diproses!"))
-                .andExpect(jsonPath("$.data.userId").value(saved.getId()))
+                .andExpect(jsonPath("$.data.userId").value(saved.getId().toString()))
                 .andExpect(jsonPath("$.data.oldKycStatus").value("PENDING"))
                 .andExpect(jsonPath("$.data.newKycStatus").value("APPROVED"))
                 .andExpect(jsonPath("$.data.oldRole").value("TITIPER"))
@@ -519,7 +560,7 @@ class ProfileControllerIntegrationTests {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Keputusan KYC berhasil diproses!"))
-                .andExpect(jsonPath("$.data.userId").value(saved.getId()))
+                .andExpect(jsonPath("$.data.userId").value(saved.getId().toString()))
                 .andExpect(jsonPath("$.data.oldKycStatus").value("PENDING"))
                 .andExpect(jsonPath("$.data.newKycStatus").value("REJECTED"))
                 .andExpect(jsonPath("$.data.oldRole").value("TITIPER"))
@@ -550,7 +591,7 @@ class ProfileControllerIntegrationTests {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Role user berhasil di-demote ke TITIPER!"))
-                .andExpect(jsonPath("$.data.userId").value(saved.getId()))
+                .andExpect(jsonPath("$.data.userId").value(saved.getId().toString()))
                 .andExpect(jsonPath("$.data.oldRole").value("JASTIPER"))
                 .andExpect(jsonPath("$.data.newRole").value("TITIPER"));
 
@@ -578,7 +619,7 @@ class ProfileControllerIntegrationTests {
                                                 .content(objectMapper.writeValueAsString(request)))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.message").value("Role user berhasil di-demote ke TITIPER!"))
-                                .andExpect(jsonPath("$.data.userId").value(saved.getId()))
+                                .andExpect(jsonPath("$.data.userId").value(saved.getId().toString()))
                                 .andExpect(jsonPath("$.data.oldRole").value("TITIPER"))
                                 .andExpect(jsonPath("$.data.newRole").value("TITIPER"));
         }
@@ -619,7 +660,7 @@ class ProfileControllerIntegrationTests {
         @Test
         void shouldReturnNotFoundWhenDemoteRoleUserDoesNotExist() throws Exception {
                 String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
-                Map<String, Object> request = Map.of("userId", 999999L);
+                Map<String, Object> request = Map.of("userId", UUID.randomUUID());
 
                 mockMvc.perform(put("/api/profile/admin/role/demote")
                                                 .header("Authorization", "Bearer " + adminToken)
@@ -691,7 +732,7 @@ class ProfileControllerIntegrationTests {
     void shouldReturnNotFoundWhenKycDecisionUserDoesNotExist() throws Exception {
         String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
         Map<String, Object> request = Map.of(
-                "userId", 999999L,
+                "userId", UUID.randomUUID(),
                 "decision", "APPROVE"
         );
 
@@ -796,7 +837,7 @@ class ProfileControllerIntegrationTests {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$.message").value("Statistik Jastiper berhasil diperbarui!"))
-                        .andExpect(jsonPath("$.data.userId").value(saved.getId()))
+                        .andExpect(jsonPath("$.data.userId").value(saved.getId().toString()))
                         .andExpect(jsonPath("$.data.oldCount").value(2))
                         .andExpect(jsonPath("$.data.newCount").value(5));
 
@@ -891,7 +932,7 @@ class ProfileControllerIntegrationTests {
             void shouldRejectJastiperStatsUpdateWhenUserNotFound() throws Exception {
                 String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
                 Map<String, Object> request = Map.of(
-                        "userId", 999999L,
+                        "userId", UUID.randomUUID(),
                         "delta", 1
                 );
 
@@ -957,7 +998,7 @@ class ProfileControllerIntegrationTests {
     void shouldReturnNotFoundWhenRoleUpgradeUserDoesNotExist() throws Exception {
         String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
 
-        Map<String, Object> request = Map.of("userId", 999999L);
+        Map<String, Object> request = Map.of("userId", UUID.randomUUID());
 
         mockMvc.perform(put("/api/profile/admin/role/upgrade")
                         .header("Authorization", "Bearer " + adminToken)
@@ -991,8 +1032,8 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldRejectRoleUpgradeForNonAdmin() throws Exception {
-        registerAndLogin("upgrade_non_admin", "upgrade_non_admin@example.com", "password123");
-        Long targetUserId = userProfileRepository.findByEmail("upgrade_non_admin@example.com")
+        registerAndLogin("upgrade_non_admin", "upgrade_non_admin@example.com", "Password123!");
+        UUID targetUserId = userProfileRepository.findByEmail("upgrade_non_admin@example.com")
                 .orElseThrow(() -> new AssertionError("User target harus ada")).getId();
 
         String nonAdminToken = jwtUtil.generateToken("titiper_test@example.com", "TITIPER");
@@ -1087,7 +1128,7 @@ class ProfileControllerIntegrationTests {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Status akun berhasil diperbarui!"))
-                .andExpect(jsonPath("$.data.userId").value(saved.getId()))
+                .andExpect(jsonPath("$.data.userId").value(saved.getId().toString()))
                 .andExpect(jsonPath("$.data.oldStatus").value("ACTIVE"))
                 .andExpect(jsonPath("$.data.newStatus").value("BANNED"));
 
@@ -1101,7 +1142,7 @@ class ProfileControllerIntegrationTests {
         String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
 
         Map<String, Object> request = Map.of(
-                "userId", 1L,
+                "userId", UUID.randomUUID(),
                 "status", "PENDING"
         );
 
@@ -1130,7 +1171,7 @@ class ProfileControllerIntegrationTests {
         String token = jwtUtil.generateToken("titiper_test@example.com", "TITIPER");
 
         Map<String, Object> request = Map.of(
-                "userId", 1L,
+                "userId", UUID.randomUUID(),
                 "status", "BANNED"
         );
 
@@ -1176,7 +1217,7 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldGetOnlyJastiperProfiles() throws Exception {
-        String token = registerAndLogin("viewer_user", "viewer_user@example.com", "password123");
+        String token = registerAndLogin("viewer_user", "viewer_user@example.com", "Password123!");
 
         UserProfile jastiper = new UserProfile();
         jastiper.setUsername("jastiper_one");
@@ -1220,7 +1261,7 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldSubmitKycSuccessfully() throws Exception {
-        String token = registerAndLogin("kyc_user", "kyc_user@example.com", "password123");
+        String token = registerAndLogin("kyc_user", "kyc_user@example.com", "Password123!");
 
         Map<String, String> kycRequest = Map.of(
                 "fullName", "KYC User",
@@ -1242,7 +1283,7 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldRejectKycSubmitWithInvalidPayload() throws Exception {
-        String token = registerAndLogin("kyc_invalid_user", "kyc_invalid_user@example.com", "password123");
+        String token = registerAndLogin("kyc_invalid_user", "kyc_invalid_user@example.com", "Password123!");
 
         Map<String, String> invalidKycRequest = Map.of(
                 "fullName", "",
@@ -1275,7 +1316,7 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldNotExposeKycDocumentUrlsInProfileList() throws Exception {
-        String token = registerAndLogin("list_user", "list_user@example.com", "password123");
+        String token = registerAndLogin("list_user", "list_user@example.com", "Password123!");
 
         Map<String, String> kycRequest = Map.of(
                 "fullName", "List User",
@@ -1289,8 +1330,9 @@ class ProfileControllerIntegrationTests {
                         .content(objectMapper.writeValueAsString(kycRequest)))
                 .andExpect(status().isOk());
 
+        String adminToken = jwtUtil.generateToken("list_user@example.com", "ADMIN");
         mockMvc.perform(get("/api/profile/all")
-                        .header("Authorization", "Bearer " + token))
+                        .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Daftar profil berhasil diambil!"))
                 .andExpect(jsonPath("$.data[0].username").value("list_user"))
@@ -1303,7 +1345,7 @@ class ProfileControllerIntegrationTests {
     void shouldCompleteMilestone50FlowEndToEnd() throws Exception {
         Map<String, String> registerRequest = Map.of(
                 "email", "milestone50@example.com",
-                "password", "password123"
+                "password", "Password123!"
         );
 
         MvcResult registerResult = mockMvc.perform(post("/api/auth/register")
@@ -1311,7 +1353,7 @@ class ProfileControllerIntegrationTests {
                         .content(objectMapper.writeValueAsString(registerRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.role").value("TITIPER"))
-                .andExpect(jsonPath("$.data.kycStatus").value("PENDING"))
+                .andExpect(jsonPath("$.data.kycStatus").value("NOT_SUBMITTED"))
                 .andExpect(jsonPath("$.data.username").isString())
                 .andReturn();
 
@@ -1320,7 +1362,7 @@ class ProfileControllerIntegrationTests {
 
         Map<String, String> loginRequest = Map.of(
                 "email", "milestone50@example.com",
-                "password", "password123"
+                "password", "Password123!"
         );
 
         MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
@@ -1370,7 +1412,7 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldPersistProfileUpdateInDatabase() throws Exception {
-        String token = registerAndLogin("db_profile_user", "db_profile_user@example.com", "password123");
+        String token = registerAndLogin("db_profile_user", "db_profile_user@example.com", "Password123!");
 
         Map<String, String> updateRequest = Map.of(
                 "fullName", "Persisted Profile",
@@ -1394,7 +1436,7 @@ class ProfileControllerIntegrationTests {
 
     @Test
     void shouldPersistKycDataInDatabase() throws Exception {
-        String token = registerAndLogin("db_kyc_user", "db_kyc_user@example.com", "password123");
+        String token = registerAndLogin("db_kyc_user", "db_kyc_user@example.com", "Password123!");
 
         Map<String, String> kycRequest = Map.of(
                 "fullName", "Persisted KYC User",
@@ -1415,6 +1457,313 @@ class ProfileControllerIntegrationTests {
         Assertions.assertEquals("https://example.com/persisted-doc", savedUser.getKycIdentityDocumentUrl());
         Assertions.assertEquals("https://instagram.com/persisted_kyc", savedUser.getKycSocialMediaUrl());
         Assertions.assertEquals("PENDING", savedUser.getKycStatus());
+    }
+
+    // =====================================================================
+    // New tests: KYC decision aliases (APPROVED/REJECTED)
+    // =====================================================================
+
+    @Test
+    void shouldAllowAdminToApproveKycUsingApprovedAlias() throws Exception {
+        UserProfile target = new UserProfile();
+        target.setUsername("kyc_approved_alias");
+        target.setEmail("kyc_approved_alias@example.com");
+        target.setPassword("dummy");
+        target.setRole(UserRole.TITIPER.name());
+        target.setKycStatus("PENDING");
+        UserProfile saved = userProfileRepository.save(target);
+
+        String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+        Map<String, Object> request = Map.of("userId", saved.getId(), "decision", "APPROVED");
+
+        mockMvc.perform(put("/api/profile/admin/kyc/decision")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.newKycStatus").value("APPROVED"))
+                .andExpect(jsonPath("$.data.newRole").value("JASTIPER"));
+    }
+
+    @Test
+    void shouldAllowAdminToRejectKycUsingRejectedAlias() throws Exception {
+        UserProfile target = new UserProfile();
+        target.setUsername("kyc_rejected_alias");
+        target.setEmail("kyc_rejected_alias@example.com");
+        target.setPassword("dummy");
+        target.setRole(UserRole.TITIPER.name());
+        target.setKycStatus("PENDING");
+        UserProfile saved = userProfileRepository.save(target);
+
+        String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+        Map<String, Object> request = Map.of("userId", saved.getId(), "decision", "REJECTED");
+
+        mockMvc.perform(put("/api/profile/admin/kyc/decision")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.newKycStatus").value("REJECTED"))
+                .andExpect(jsonPath("$.data.newRole").value("TITIPER"));
+    }
+
+    // =====================================================================
+    // New tests: KYC decision guard (Bug 3)
+    // =====================================================================
+
+    @Test
+    void shouldRejectKycDecisionWhenKycStatusIsNotSubmitted() throws Exception {
+        UserProfile target = new UserProfile();
+        target.setUsername("kyc_not_submitted");
+        target.setEmail("kyc_not_submitted@example.com");
+        target.setPassword("dummy");
+        target.setRole(UserRole.TITIPER.name());
+        target.setKycStatus("NOT_SUBMITTED");
+        UserProfile saved = userProfileRepository.save(target);
+
+        String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+        Map<String, Object> request = Map.of("userId", saved.getId(), "decision", "APPROVE");
+
+        mockMvc.perform(put("/api/profile/admin/kyc/decision")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("KYC hanya dapat diputuskan jika statusnya PENDING!"));
+    }
+
+    @Test
+    void shouldRejectKycDecisionWhenKycStatusIsAlreadyApproved() throws Exception {
+        UserProfile target = new UserProfile();
+        target.setUsername("kyc_already_approved");
+        target.setEmail("kyc_already_approved@example.com");
+        target.setPassword("dummy");
+        target.setRole(UserRole.JASTIPER.name());
+        target.setKycStatus("APPROVED");
+        UserProfile saved = userProfileRepository.save(target);
+
+        String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+        Map<String, Object> request = Map.of("userId", saved.getId(), "decision", "REJECT");
+
+        mockMvc.perform(put("/api/profile/admin/kyc/decision")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("KYC hanya dapat diputuskan jika statusnya PENDING!"));
+    }
+
+    @Test
+    void shouldRejectKycDecisionWhenKycStatusIsAlreadyRejected() throws Exception {
+        UserProfile target = new UserProfile();
+        target.setUsername("kyc_already_rejected");
+        target.setEmail("kyc_already_rejected@example.com");
+        target.setPassword("dummy");
+        target.setRole(UserRole.TITIPER.name());
+        target.setKycStatus("REJECTED");
+        UserProfile saved = userProfileRepository.save(target);
+
+        String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+        Map<String, Object> request = Map.of("userId", saved.getId(), "decision", "APPROVE");
+
+        mockMvc.perform(put("/api/profile/admin/kyc/decision")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("KYC hanya dapat diputuskan jika statusnya PENDING!"));
+    }
+
+    // =====================================================================
+    // New tests: upgradeRoleToJastiper KYC guard (Bug 2)
+    // =====================================================================
+
+    @Test
+    void shouldRejectRoleUpgradeWhenKycStatusIsNotSubmitted() throws Exception {
+        UserProfile target = new UserProfile();
+        target.setUsername("upgrade_not_submitted");
+        target.setEmail("upgrade_not_submitted@example.com");
+        target.setPassword("dummy");
+        target.setRole(UserRole.TITIPER.name());
+        target.setKycStatus("NOT_SUBMITTED");
+        UserProfile saved = userProfileRepository.save(target);
+
+        String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+        Map<String, Object> request = Map.of("userId", saved.getId());
+
+        mockMvc.perform(put("/api/profile/admin/role/upgrade")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Hanya user dengan KYC APPROVED yang dapat di-upgrade ke JASTIPER!"));
+    }
+
+    @Test
+    void shouldRejectRoleUpgradeWhenKycStatusIsPending() throws Exception {
+        UserProfile target = new UserProfile();
+        target.setUsername("upgrade_pending_kyc");
+        target.setEmail("upgrade_pending_kyc@example.com");
+        target.setPassword("dummy");
+        target.setRole(UserRole.TITIPER.name());
+        target.setKycStatus("PENDING");
+        UserProfile saved = userProfileRepository.save(target);
+
+        String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+        Map<String, Object> request = Map.of("userId", saved.getId());
+
+        mockMvc.perform(put("/api/profile/admin/role/upgrade")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Hanya user dengan KYC APPROVED yang dapat di-upgrade ke JASTIPER!"));
+    }
+
+    // =====================================================================
+    // New tests: submitKyc accountStatus flow (Bug 4)
+    // =====================================================================
+
+    @Test
+    void shouldSetAccountStatusToPendingAfterKycSubmission() throws Exception {
+        String token = registerAndLogin("kyc_status_check", "kyc_status_check@example.com", "Password123!");
+
+        Map<String, String> kycRequest = Map.of(
+                "fullName", "Status Check User",
+                "identityDocumentUrl", "https://example.com/status-check-doc",
+                "socialMediaUrl", "https://instagram.com/status_check"
+        );
+
+        mockMvc.perform(post("/api/profile/kyc/submit")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(kycRequest)))
+                .andExpect(status().isOk());
+
+        UserProfile savedUser = userProfileRepository.findByEmail("kyc_status_check@example.com")
+                .orElseThrow(() -> new AssertionError("User seharusnya ada di database"));
+
+        Assertions.assertEquals("PENDING", savedUser.getKycStatus());
+        Assertions.assertEquals(AccountStatus.PENDING.name(), savedUser.getAccountStatus());
+    }
+
+    @Test
+    void shouldResetAccountStatusToActiveAfterKycApproval() throws Exception {
+        UserProfile target = new UserProfile();
+        target.setUsername("kyc_approve_status");
+        target.setEmail("kyc_approve_status@example.com");
+        target.setPassword("dummy");
+        target.setRole(UserRole.TITIPER.name());
+        target.setKycStatus("PENDING");
+        target.setAccountStatus(AccountStatus.PENDING.name());
+        UserProfile saved = userProfileRepository.save(target);
+
+        String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+        Map<String, Object> request = Map.of("userId", saved.getId(), "decision", "APPROVE");
+
+        mockMvc.perform(put("/api/profile/admin/kyc/decision")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk());
+
+        UserProfile updated = userProfileRepository.findById(saved.getId())
+                .orElseThrow(() -> new AssertionError("User target harus tetap ada"));
+
+        Assertions.assertEquals("APPROVED", updated.getKycStatus());
+        Assertions.assertEquals(AccountStatus.ACTIVE.name(), updated.getAccountStatus());
+    }
+
+    @Test
+    void shouldResetAccountStatusToActiveAfterKycRejection() throws Exception {
+        UserProfile target = new UserProfile();
+        target.setUsername("kyc_reject_status");
+        target.setEmail("kyc_reject_status@example.com");
+        target.setPassword("dummy");
+        target.setRole(UserRole.TITIPER.name());
+        target.setKycStatus("PENDING");
+        target.setAccountStatus(AccountStatus.PENDING.name());
+        UserProfile saved = userProfileRepository.save(target);
+
+        String adminToken = jwtUtil.generateToken("admin_test@example.com", "ADMIN");
+        Map<String, Object> request = Map.of("userId", saved.getId(), "decision", "REJECT");
+
+        mockMvc.perform(put("/api/profile/admin/kyc/decision")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk());
+
+        UserProfile updated = userProfileRepository.findById(saved.getId())
+                .orElseThrow(() -> new AssertionError("User target harus tetap ada"));
+
+        Assertions.assertEquals("REJECTED", updated.getKycStatus());
+        Assertions.assertEquals(AccountStatus.ACTIVE.name(), updated.getAccountStatus());
+    }
+
+    @Test
+    void shouldRejectKycResubmissionWhenAlreadyApproved() throws Exception {
+        String token = registerAndLogin("kyc_resubmit", "kyc_resubmit@example.com", "Password123!");
+
+        UserProfile user = userProfileRepository.findByEmail("kyc_resubmit@example.com")
+                .orElseThrow(() -> new AssertionError("User harus ada"));
+        user.setKycStatus("APPROVED");
+        userProfileRepository.save(user);
+
+        Map<String, String> kycRequest = Map.of(
+                "fullName", "Resubmit User",
+                "identityDocumentUrl", "https://example.com/doc",
+                "socialMediaUrl", "https://instagram.com/resubmit"
+        );
+
+        mockMvc.perform(post("/api/profile/kyc/submit")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(kycRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("KYC sudah disetujui dan tidak dapat diajukan ulang!"));
+    }
+
+    // =====================================================================
+    // New tests: public endpoint field safety (Bug 5)
+    // =====================================================================
+
+    @Test
+    void shouldNotExposeEmailOrAccountStatusOnPublicLookup() throws Exception {
+        UserProfile user = new UserProfile();
+        user.setUsername("public_safe_lookup");
+        user.setEmail("public_safe_lookup@example.com");
+        user.setPassword("dummy");
+        user.setRole(UserRole.TITIPER.name());
+        user.setKycStatus("NOT_SUBMITTED");
+        userProfileRepository.save(user);
+
+        mockMvc.perform(get("/api/profile/lookup")
+                        .param("username", "public_safe_lookup"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.username").value("public_safe_lookup"))
+                .andExpect(jsonPath("$.data.email").doesNotExist())
+                .andExpect(jsonPath("$.data.phoneNumber").doesNotExist())
+                .andExpect(jsonPath("$.data.accountStatus").doesNotExist())
+                .andExpect(jsonPath("$.data.kycStatus").value("NOT_SUBMITTED"));
+    }
+
+    @Test
+    void shouldNotExposeEmailOrAccountStatusOnPublicJastiperList() throws Exception {
+        UserProfile jastiper = new UserProfile();
+        jastiper.setUsername("public_safe_jastiper");
+        jastiper.setEmail("public_safe_jastiper@example.com");
+        jastiper.setPassword("dummy");
+        jastiper.setRole(UserRole.JASTIPER.name());
+        jastiper.setKycStatus("APPROVED");
+        jastiper.setSuccessfulTransactionCount(3L);
+        userProfileRepository.save(jastiper);
+
+        mockMvc.perform(get("/api/profile/jastiper"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].email").doesNotExist())
+                .andExpect(jsonPath("$.data[0].phoneNumber").doesNotExist())
+                .andExpect(jsonPath("$.data[0].accountStatus").doesNotExist());
     }
 }
 

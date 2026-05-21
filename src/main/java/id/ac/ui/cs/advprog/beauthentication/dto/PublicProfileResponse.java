@@ -7,10 +7,12 @@ import java.util.UUID;
 
 @Data
 @AllArgsConstructor
-public class UserLookupSummaryResponse {
+public class PublicProfileResponse {
     private UUID id;
     private String username;
-    private String email;
+    private String fullName;
+    private String bio;
     private String role;
     private String kycStatus;
+    private Long successfulTransactionCount;
 }

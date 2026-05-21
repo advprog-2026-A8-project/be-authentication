@@ -22,6 +22,9 @@ public class SecurityConfig {
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Autowired
+    private RateLimitFilter rateLimitFilter;
+
+    @Autowired
     private RestAuthenticationEntryPoint restAuthenticationEntryPoint;
 
     @Autowired
@@ -41,8 +44,11 @@ public class SecurityConfig {
                         "/api/auth/register",
                         "/api/auth/login",
                         "/api/profile/lookup",
-                        "/api/profile/jastiper"
-                    ).permitAll() // Register, login, dan public profile
+                        "/api/profile/jastiper",
+                        "/swagger-ui/**",
+                        "/swagger-ui.html",
+                        "/v3/api-docs/**"
+                    ).permitAll() // Register, login, public profile, dan Swagger UI
                         .anyRequest().authenticated() // Kunci endpoint lainnya (harus pakai token)
                 )
                 .exceptionHandling(exceptions -> exceptions
@@ -52,7 +58,9 @@ public class SecurityConfig {
                 // Ubah session menjadi STATELESS karena kita pakai token (tidak butuh session/cookies dari server)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // Pasang filter JWT kita sebelum filter bawaan Spring Security
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                // Pasang rate limiter sebelum JWT filter agar login/register yang melampaui batas langsung ditolak
+                .addFilterBefore(rateLimitFilter, JwtAuthenticationFilter.class);
 
         return http.build();
     }

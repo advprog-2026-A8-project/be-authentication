@@ -1,10 +1,17 @@
 package id.ac.ui.cs.advprog.beauthentication.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
+
+import java.util.UUID;
 
 @Entity
 @Table(name = "user_profiles")
@@ -14,8 +21,8 @@ import lombok.NoArgsConstructor;
 public class UserProfile {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(nullable = false, unique = true)
     private String username;
@@ -43,7 +50,7 @@ public class UserProfile {
     private String accountStatus = AccountStatus.ACTIVE.name();
 
     @Column(nullable = false)
-    private String kycStatus = "PENDING";
+    private String kycStatus = KycStatus.NOT_SUBMITTED.name();
 
     @Column(name = "kyc_identity_document_url")
     private String kycIdentityDocumentUrl;

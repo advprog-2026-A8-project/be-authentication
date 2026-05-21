@@ -12,7 +12,12 @@ import id.ac.ui.cs.advprog.beauthentication.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -25,7 +30,9 @@ public class AuthController {
     private JwtUtil jwtUtil;
 
     private boolean isAuthenticationFailure(String message) {
-        return "Email tidak ditemukan!".equals(message) || "Password salah!".equals(message);
+        return "Email tidak ditemukan!".equals(message)
+                || "Password salah!".equals(message)
+                || "Akun Anda telah di-ban!".equals(message);
     }
 
     private RegisterResponse toRegisterResponse(UserProfile user) {
@@ -62,9 +69,10 @@ public class AuthController {
     public ResponseEntity<ApiResponse<LoginResponse>> login(@RequestBody LoginRequest request) {
         try {
             UserProfile user = authService.login(request);
-            String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
-            
-            return ResponseEntity.ok(new ApiResponse<>("Login berhasil!", new LoginResponse(token)));
+            String token = jwtUtil.generateToken(user.getEmail(), user.getRole(), user.getId().toString());
+
+            return ResponseEntity.ok(new ApiResponse<>("Login berhasil!",
+                    new LoginResponse(token, user.getId().toString(), user.getRole())));
         } catch (IllegalArgumentException e) {
             HttpStatus status = isAuthenticationFailure(e.getMessage())
                     ? HttpStatus.UNAUTHORIZED

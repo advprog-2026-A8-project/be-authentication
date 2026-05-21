@@ -22,7 +22,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Locale;
+import java.util.UUID;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,6 +32,14 @@ public class ProfileService {
 
     private static final String KYC_APPROVE = "APPROVE";
     private static final String KYC_REJECT = "REJECT";
+    private static final String KYC_APPROVED = "APPROVED";
+    private static final String KYC_REJECTED = "REJECTED";
+
+    private static final Pattern PHONE_PATTERN =
+            Pattern.compile("^\\+?[0-9]{8,15}$");
+
+    private static final Pattern URL_PATTERN =
+            Pattern.compile("^https?://.+");
 
     @Autowired
     private UserProfileRepository repository;
@@ -58,7 +68,7 @@ public class ProfileService {
         return getByPrincipal(username);
     }
 
-    public UserProfile getByIdentifier(Long id, String username, String email) {
+    public UserProfile getByIdentifier(UUID id, String username, String email) {
         int providedCount = 0;
 
         if (id != null) {
@@ -102,7 +112,7 @@ public class ProfileService {
         return repository.findAll();
     }
 
-    public BulkProfileLookupResponse bulkLookupByIds(List<Long> userIds) {
+    public BulkProfileLookupResponse bulkLookupByIds(List<UUID> userIds) {
         if (userIds == null || userIds.isEmpty()) {
             throw new IllegalArgumentException("userIds wajib diisi!");
         }
@@ -111,14 +121,14 @@ public class ProfileService {
             throw new IllegalArgumentException("userIds tidak boleh berisi null!");
         }
 
-        LinkedHashSet<Long> uniqueIds = new LinkedHashSet<>(userIds);
-        Map<Long, UserProfile> profileMap = repository.findAllById(uniqueIds).stream()
+        LinkedHashSet<UUID> uniqueIds = new LinkedHashSet<>(userIds);
+        Map<UUID, UserProfile> profileMap = repository.findAllById(uniqueIds).stream()
                 .collect(Collectors.toMap(UserProfile::getId, Function.identity()));
 
         List<UserLookupSummaryResponse> users = new ArrayList<>();
-        List<Long> notFoundIds = new ArrayList<>();
+        List<UUID> notFoundIds = new ArrayList<>();
 
-        for (Long id : uniqueIds) {
+        for (UUID id : uniqueIds) {
             UserProfile user = profileMap.get(id);
             if (user == null) {
                 notFoundIds.add(id);
@@ -130,7 +140,7 @@ public class ProfileService {
         return new BulkProfileLookupResponse(users, notFoundIds);
     }
 
-    public RoleUpgradeResponse upgradeRoleToJastiper(Long userId) {
+    public RoleUpgradeResponse upgradeRoleToJastiper(UUID userId) {
         if (userId == null) {
             throw new IllegalArgumentException("userId wajib diisi!");
         }
@@ -148,13 +158,17 @@ public class ProfileService {
             throw new IllegalArgumentException("Hanya user TITIPER yang dapat di-upgrade ke JASTIPER!");
         }
 
+        if (!KycStatus.APPROVED.name().equals(user.getKycStatus())) {
+            throw new IllegalArgumentException("Hanya user dengan KYC APPROVED yang dapat di-upgrade ke JASTIPER!");
+        }
+
         user.setRole(UserRole.JASTIPER.name());
         UserProfile updated = repository.save(user);
 
         return new RoleUpgradeResponse(updated.getId(), oldRole, updated.getRole());
     }
 
-    public RoleDemoteResponse demoteRoleToTitiper(Long userId) {
+    public RoleDemoteResponse demoteRoleToTitiper(UUID userId) {
         if (userId == null) {
             throw new IllegalArgumentException("userId wajib diisi!");
         }
@@ -182,7 +196,7 @@ public class ProfileService {
         return new RoleDemoteResponse(updated.getId(), oldRole, updated.getRole());
     }
 
-    public KycDecisionResponse decideKyc(Long userId, String decision) {
+    public KycDecisionResponse decideKyc(UUID userId, String decision) {
         if (userId == null) {
             throw new IllegalArgumentException("userId wajib diisi!");
         }
@@ -192,6 +206,12 @@ public class ProfileService {
         }
 
         String normalizedDecision = decision.trim().toUpperCase(Locale.ROOT);
+        if (KYC_APPROVED.equals(normalizedDecision)) {
+            normalizedDecision = KYC_APPROVE;
+        } else if (KYC_REJECTED.equals(normalizedDecision)) {
+            normalizedDecision = KYC_REJECT;
+        }
+
         if (!KYC_APPROVE.equals(normalizedDecision) && !KYC_REJECT.equals(normalizedDecision)) {
             throw new IllegalArgumentException("decision tidak valid!");
         }
@@ -199,16 +219,22 @@ public class ProfileService {
         UserProfile user = repository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Pengguna tidak ditemukan!"));
 
+        if (!KycStatus.PENDING.name().equals(user.getKycStatus())) {
+            throw new IllegalArgumentException("KYC hanya dapat diputuskan jika statusnya PENDING!");
+        }
+
         String oldKycStatus = user.getKycStatus();
         String oldRole = user.getRole();
 
         if (KYC_APPROVE.equals(normalizedDecision)) {
             user.setKycStatus(KycStatus.APPROVED.name());
+            user.setAccountStatus(AccountStatus.ACTIVE.name());
             if (UserRole.TITIPER.name().equals(oldRole)) {
                 user.setRole(UserRole.JASTIPER.name());
             }
         } else {
             user.setKycStatus(KycStatus.REJECTED.name());
+            user.setAccountStatus(AccountStatus.ACTIVE.name());
         }
 
         UserProfile updated = repository.save(user);
@@ -221,7 +247,7 @@ public class ProfileService {
         );
     }
 
-    public JastiperStatsUpdateResponse incrementSuccessfulTransactionCount(Long userId, Long delta) {
+    public JastiperStatsUpdateResponse incrementSuccessfulTransactionCount(UUID userId, Long delta) {
         if (userId == null) {
             throw new IllegalArgumentException("userId wajib diisi!");
         }
@@ -253,7 +279,7 @@ public class ProfileService {
         return new JastiperStatsUpdateResponse(updated.getId(), oldCount, updated.getSuccessfulTransactionCount());
     }
 
-    public AccountStatusUpdateResponse updateAccountStatus(Long userId, String status) {
+    public AccountStatusUpdateResponse updateAccountStatus(UUID userId, String status) {
         if (userId == null) {
             throw new IllegalArgumentException("userId wajib diisi!");
         }
@@ -316,7 +342,11 @@ public class ProfileService {
         }
 
         if (request.getPhoneNumber() != null) {
-            currentUser.setPhoneNumber(request.getPhoneNumber().trim());
+            String trimmedPhone = request.getPhoneNumber().trim();
+            if (!trimmedPhone.isBlank() && !PHONE_PATTERN.matcher(trimmedPhone).matches()) {
+                throw new IllegalArgumentException("Nomor telepon tidak valid!");
+            }
+            currentUser.setPhoneNumber(trimmedPhone);
         }
 
         if (request.getBio() != null) {
@@ -337,11 +367,25 @@ public class ProfileService {
             throw new IllegalArgumentException("fullName, identityDocumentUrl, dan socialMediaUrl wajib diisi!");
         }
 
+        if (!URL_PATTERN.matcher(request.getIdentityDocumentUrl().trim()).matches()) {
+            throw new IllegalArgumentException("URL harus diawali dengan http:// atau https://");
+        }
+
+        if (!URL_PATTERN.matcher(request.getSocialMediaUrl().trim()).matches()) {
+            throw new IllegalArgumentException("URL harus diawali dengan http:// atau https://");
+        }
+
         UserProfile currentUser = getByPrincipal(principalIdentifier);
+
+        if (KycStatus.APPROVED.name().equals(currentUser.getKycStatus())) {
+            throw new IllegalArgumentException("KYC sudah disetujui dan tidak dapat diajukan ulang!");
+        }
+
         currentUser.setFullName(request.getFullName().trim());
         currentUser.setKycIdentityDocumentUrl(request.getIdentityDocumentUrl().trim());
         currentUser.setKycSocialMediaUrl(request.getSocialMediaUrl().trim());
         currentUser.setKycStatus(KycStatus.PENDING.name());
+        currentUser.setAccountStatus(AccountStatus.PENDING.name());
 
         return repository.save(currentUser);
     }

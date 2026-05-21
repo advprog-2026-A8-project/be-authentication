@@ -11,10 +11,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.regex.Pattern;
+
 @Service
 public class AuthService {
 
     private static final int MIN_PASSWORD_LENGTH = 8;
+
+    private static final Pattern EMAIL_PATTERN =
+            Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
+
+    private static final Pattern PASSWORD_COMPLEXITY_PATTERN =
+            Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&_#]).{8,}$");
+
+    private static final Pattern USERNAME_FORMAT_PATTERN =
+            Pattern.compile("^[a-zA-Z0-9_]{3,30}$");
 
     @Autowired
     private UserProfileRepository repository;
@@ -27,9 +38,7 @@ public class AuthService {
     }
 
     private boolean isValidEmail(String email) {
-        int atIndex = email.indexOf('@');
-        int dotIndex = email.lastIndexOf('.');
-        return atIndex > 0 && dotIndex > atIndex + 1 && dotIndex < email.length() - 1;
+        return EMAIL_PATTERN.matcher(email).matches();
     }
 
     private String generateUsername(String normalizedEmail) {
@@ -65,15 +74,27 @@ public class AuthService {
             throw new IllegalArgumentException("Password minimal 8 karakter!");
         }
 
+        if (!PASSWORD_COMPLEXITY_PATTERN.matcher(request.getPassword()).matches()) {
+            throw new IllegalArgumentException(
+                    "Password harus mengandung huruf besar, huruf kecil, angka, dan karakter spesial (@$!%*?&_#)!");
+        }
+
         String normalizedEmail = request.getEmail().trim().toLowerCase();
 
         if (!isValidEmail(normalizedEmail)) {
             throw new IllegalArgumentException("Format email tidak valid!");
         }
 
-        String normalizedUsername = isBlank(request.getUsername())
-                ? generateUsername(normalizedEmail)
-                : request.getUsername().trim();
+        String normalizedUsername;
+        if (isBlank(request.getUsername())) {
+            normalizedUsername = generateUsername(normalizedEmail);
+        } else {
+            normalizedUsername = request.getUsername().trim();
+            if (!USERNAME_FORMAT_PATTERN.matcher(normalizedUsername).matches()) {
+                throw new IllegalArgumentException(
+                        "Username hanya boleh berisi huruf, angka, dan underscore (3-30 karakter)!");
+            }
+        }
 
         if (repository.findByUsername(normalizedUsername).isPresent() ||
                 repository.findByEmail(normalizedEmail).isPresent()) {
@@ -87,12 +108,12 @@ public class AuthService {
 
         user.setRole(UserRole.TITIPER.name());
         user.setAccountStatus(AccountStatus.ACTIVE.name());
-        user.setKycStatus(KycStatus.PENDING.name());
+        user.setKycStatus(KycStatus.NOT_SUBMITTED.name());
 
         return repository.save(user);
     }
 
-    public UserProfile login(LoginRequest request){
+    public UserProfile login(LoginRequest request) {
         if (request == null) {
             throw new IllegalArgumentException("Request tidak boleh kosong!");
         }
@@ -107,13 +128,15 @@ public class AuthService {
             throw new IllegalArgumentException("Format email tidak valid!");
         }
 
-        // cari user dari email
         UserProfile user = repository.findByEmail(normalizedEmail)
-            .orElseThrow(() -> new IllegalArgumentException("Email tidak ditemukan!"));
+                .orElseThrow(() -> new IllegalArgumentException("Email tidak ditemukan!"));
 
-        // cocokkan password
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new IllegalArgumentException("Password salah!");
+        }
+
+        if (AccountStatus.BANNED.name().equals(user.getAccountStatus())) {
+            throw new IllegalArgumentException("Akun Anda telah di-ban!");
         }
 
         return user;

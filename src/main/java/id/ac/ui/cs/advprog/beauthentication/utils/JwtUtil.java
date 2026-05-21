@@ -14,6 +14,7 @@ import java.util.Date;
 public class JwtUtil {
 
     private static final String ROLE_CLAIM = "role";
+    private static final String USER_ID_CLAIM = "userId";
 
     @Value("${jwt.secret}")
     private String secret;
@@ -26,10 +27,14 @@ public class JwtUtil {
     }
 
     public String generateToken(String username) {
-        return generateToken(username, null);
+        return generateToken(username, null, null);
     }
 
     public String generateToken(String username, String role) {
+        return generateToken(username, role, null);
+    }
+
+    public String generateToken(String username, String role, String userId) {
         var builder = Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
@@ -37,6 +42,10 @@ public class JwtUtil {
 
         if (role != null && !role.isBlank()) {
             builder.claim(ROLE_CLAIM, role);
+        }
+
+        if (userId != null && !userId.isBlank()) {
+            builder.claim(USER_ID_CLAIM, userId);
         }
 
         return builder
@@ -54,6 +63,10 @@ public class JwtUtil {
 
     public String extractRole(String token) {
         return extractAllClaims(token).get(ROLE_CLAIM, String.class);
+    }
+
+    public String extractUserId(String token) {
+        return extractAllClaims(token).get(USER_ID_CLAIM, String.class);
     }
 
     public Date extractExpiration(String token) {

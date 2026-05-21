@@ -45,7 +45,7 @@ class AuthSecurityIntegrationTests {
 
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\":\"" + email + "\",\"password\":\"password123\"}"))
+                        .content("{\"email\":\"" + email + "\",\"password\":\"Password123!\"}"))
                 .andExpect(status().isOk());
     }
 
@@ -55,12 +55,12 @@ class AuthSecurityIntegrationTests {
 
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\":\"" + email + "\",\"password\":\"password123\"}"))
+                        .content("{\"email\":\"" + email + "\",\"password\":\"Password123!\"}"))
                 .andExpect(status().isOk());
 
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\":\"" + email + "\",\"password\":\"password123\"}"))
+                        .content("{\"email\":\"" + email + "\",\"password\":\"Password123!\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.token").isString());
     }

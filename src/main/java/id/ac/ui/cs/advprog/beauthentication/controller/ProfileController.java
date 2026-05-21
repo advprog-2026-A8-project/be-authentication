@@ -12,6 +12,7 @@ import id.ac.ui.cs.advprog.beauthentication.dto.KycDecisionResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.KycSubmissionRequest;
 import id.ac.ui.cs.advprog.beauthentication.dto.KycSubmissionResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.ProfileResponse;
+import id.ac.ui.cs.advprog.beauthentication.dto.PublicProfileResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.RoleDemoteRequest;
 import id.ac.ui.cs.advprog.beauthentication.dto.RoleDemoteResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.RoleUpgradeRequest;
@@ -30,6 +31,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.UUID;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.access.prepost.PreAuthorize;
 
@@ -68,6 +71,18 @@ public class ProfileController {
         return authentication.getName();
     }
 
+    private PublicProfileResponse toPublicProfileResponse(UserProfile user) {
+        return new PublicProfileResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getFullName(),
+                user.getBio(),
+                user.getRole(),
+                user.getKycStatus(),
+                user.getSuccessfulTransactionCount()
+        );
+    }
+
     private boolean isNotFound(String message) {
         return "Pengguna tidak ditemukan!".equals(message);
     }
@@ -82,6 +97,7 @@ public class ProfileController {
     }
 
     @GetMapping("/all")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<ProfileResponse>>> getAllProfiles() {
         List<ProfileResponse> profiles = repository.findAll().stream()
                 .map(this::toProfileResponse)
@@ -99,22 +115,22 @@ public class ProfileController {
     }
 
     @GetMapping("/jastiper")
-    public ResponseEntity<ApiResponse<List<ProfileResponse>>> getAllJastiperProfiles() {
-        List<ProfileResponse> profiles = profileService.getAllJastiperProfiles().stream()
-                .map(this::toProfileResponse)
+    public ResponseEntity<ApiResponse<List<PublicProfileResponse>>> getAllJastiperProfiles() {
+        List<PublicProfileResponse> profiles = profileService.getAllJastiperProfiles().stream()
+                .map(this::toPublicProfileResponse)
                 .toList();
         return ResponseEntity.ok(new ApiResponse<>("Daftar jastiper berhasil diambil!", profiles));
     }
 
     @GetMapping("/lookup")
-    public ResponseEntity<ApiResponse<ProfileResponse>> lookupProfile(
-            @RequestParam(required = false) Long id,
+    public ResponseEntity<ApiResponse<PublicProfileResponse>> lookupProfile(
+            @RequestParam(required = false) UUID id,
             @RequestParam(required = false) String username,
             @RequestParam(required = false) String email
     ) {
         try {
             UserProfile user = profileService.getByIdentifier(id, username, email);
-            return ResponseEntity.ok(new ApiResponse<>("Profil berhasil ditemukan!", toProfileResponse(user)));
+            return ResponseEntity.ok(new ApiResponse<>("Profil berhasil ditemukan!", toPublicProfileResponse(user)));
         } catch (IllegalArgumentException e) {
             HttpStatus status = isNotFound(e.getMessage()) ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST;
             return ResponseEntity.status(status)
@@ -127,7 +143,7 @@ public class ProfileController {
             @RequestBody BulkProfileLookupRequest request
     ) {
         try {
-            List<Long> userIds = request == null ? null : request.getUserIds();
+            List<UUID> userIds = request == null ? null : request.getUserIds();
             BulkProfileLookupResponse response = profileService.bulkLookupByIds(userIds);
             return ResponseEntity.ok(new ApiResponse<>("Bulk lookup profil berhasil!", response));
         } catch (IllegalArgumentException e) {
@@ -141,7 +157,7 @@ public class ProfileController {
             @RequestBody RoleUpgradeRequest request
     ) {
         try {
-            Long userId = request == null ? null : request.getUserId();
+            UUID userId = request == null ? null : request.getUserId();
             RoleUpgradeResponse response = profileService.upgradeRoleToJastiper(userId);
             return ResponseEntity.ok(new ApiResponse<>("Role user berhasil di-upgrade ke JASTIPER!", response));
         } catch (IllegalArgumentException e) {
@@ -157,7 +173,7 @@ public class ProfileController {
             @RequestBody RoleDemoteRequest request
     ) {
         try {
-            Long userId = request == null ? null : request.getUserId();
+            UUID userId = request == null ? null : request.getUserId();
             RoleDemoteResponse response = profileService.demoteRoleToTitiper(userId);
             return ResponseEntity.ok(new ApiResponse<>("Role user berhasil di-demote ke TITIPER!", response));
         } catch (IllegalArgumentException e) {
@@ -173,7 +189,7 @@ public class ProfileController {
             @RequestBody KycDecisionRequest request
     ) {
         try {
-            Long userId = request == null ? null : request.getUserId();
+            UUID userId = request == null ? null : request.getUserId();
             String decision = request == null ? null : request.getDecision();
             KycDecisionResponse response = profileService.decideKyc(userId, decision);
             return ResponseEntity.ok(new ApiResponse<>("Keputusan KYC berhasil diproses!", response));
@@ -190,7 +206,7 @@ public class ProfileController {
             @RequestBody JastiperStatsUpdateRequest request
     ) {
         try {
-            Long userId = request == null ? null : request.getUserId();
+            UUID userId = request == null ? null : request.getUserId();
             Long delta = request == null ? null : request.getDelta();
             JastiperStatsUpdateResponse response = profileService.incrementSuccessfulTransactionCount(userId, delta);
             return ResponseEntity.ok(new ApiResponse<>("Statistik Jastiper berhasil diperbarui!", response));
@@ -207,7 +223,7 @@ public class ProfileController {
             @RequestBody AccountStatusUpdateRequest request
     ) {
         try {
-            Long userId = request == null ? null : request.getUserId();
+            UUID userId = request == null ? null : request.getUserId();
             String status = request == null ? null : request.getStatus();
             AccountStatusUpdateResponse response = profileService.updateAccountStatus(userId, status);
             return ResponseEntity.ok(new ApiResponse<>("Status akun berhasil diperbarui!", response));
