@@ -4,4 +4,5 @@
     "https://checkstyle.org/dtds/suppressions_1_0.dtd">
 <suppressions>
     <suppress checks="MethodName" files=".*Tests\.java$"/>
+    <suppress checks="MethodName" files=".*Benchmark\.java$"/>
 </suppressions>
