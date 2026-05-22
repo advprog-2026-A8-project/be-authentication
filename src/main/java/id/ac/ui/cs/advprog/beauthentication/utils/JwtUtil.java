@@ -30,7 +30,7 @@ public class JwtUtil {
             .expireAfterWrite(10, TimeUnit.MINUTES)
             .build();
 
-    Cache<String, Claims> getClaimsCache() {
+    public Cache<String, Claims> getClaimsCache() {
         return claimsCache;
     }
 
