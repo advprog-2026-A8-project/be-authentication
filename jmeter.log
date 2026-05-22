@@ -1,0 +1,435 @@
+2026-05-22 13:39:17,802 INFO o.a.j.u.JMeterUtils: Setting Locale to en_EN
+2026-05-22 13:39:17,829 INFO o.a.j.JMeter: Loading user properties from: C:\Program Files\apache-jmeter-5.6.3\bin\user.properties
+2026-05-22 13:39:17,831 INFO o.a.j.JMeter: Loading system properties from: C:\Program Files\apache-jmeter-5.6.3\bin\system.properties
+2026-05-22 13:39:17,841 INFO o.a.j.JMeter: Copyright (c) 1998-2024 The Apache Software Foundation
+2026-05-22 13:39:17,841 INFO o.a.j.JMeter: Version 5.6.3
+2026-05-22 13:39:17,841 INFO o.a.j.JMeter: java.version=21.0.10
+2026-05-22 13:39:17,841 INFO o.a.j.JMeter: java.vm.name=Java HotSpot(TM) 64-Bit Server VM
+2026-05-22 13:39:17,842 INFO o.a.j.JMeter: os.name=Windows 11
+2026-05-22 13:39:17,842 INFO o.a.j.JMeter: os.arch=amd64
+2026-05-22 13:39:17,842 INFO o.a.j.JMeter: os.version=10.0
+2026-05-22 13:39:17,842 INFO o.a.j.JMeter: file.encoding=UTF-8
+2026-05-22 13:39:17,842 INFO o.a.j.JMeter: java.awt.headless=true
+2026-05-22 13:39:17,842 INFO o.a.j.JMeter: Max memory     =1073741824
+2026-05-22 13:39:17,842 INFO o.a.j.JMeter: Available Processors =22
+2026-05-22 13:39:17,854 INFO o.a.j.JMeter: Default Locale=English (EN)
+2026-05-22 13:39:17,854 INFO o.a.j.JMeter: JMeter  Locale=English (EN)
+2026-05-22 13:39:17,854 INFO o.a.j.JMeter: JMeterHome=C:\Program Files\apache-jmeter-5.6.3
+2026-05-22 13:39:17,855 INFO o.a.j.JMeter: user.dir  =C:\Users\Asus\New Journey\be-authentication
+2026-05-22 13:39:17,855 INFO o.a.j.JMeter: PWD       =C:\Users\Asus\New Journey\be-authentication
+2026-05-22 13:39:17,932 INFO o.a.j.JMeter: IP: 10.5.205.219 Name: LAPTOP-NOPALZZZ FullName: 10.5.205.219
+2026-05-22 13:39:17,955 INFO o.a.j.JMeter: Setting property 'jmeter.reportgenerator.outputdir' to:'C:\Users\Asus\New Journey\be-authentication\build\reports\jmeter'
+2026-05-22 13:39:17,960 INFO o.a.j.s.FileServer: Default base='C:\Users\Asus\New Journey\be-authentication'
+2026-05-22 13:39:17,982 INFO o.a.j.s.FileServer: Set new base='C:\Users\Asus\New Journey\be-authentication'
+2026-05-22 13:39:18,292 INFO o.a.j.s.SaveService: Testplan (JMX) version: 2.2. Testlog (JTL) version: 2.2
+2026-05-22 13:39:18,348 INFO o.a.j.s.SaveService: Using SaveService properties version 5.0
+2026-05-22 13:39:18,354 INFO o.a.j.s.SaveService: Using SaveService properties file encoding UTF-8
+2026-05-22 13:39:18,361 INFO o.a.j.s.SaveService: Loading file: auth-load-test.jmx
+2026-05-22 13:39:18,440 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for text/html is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser
+2026-05-22 13:39:18,441 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for application/xhtml+xml is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser
+2026-05-22 13:39:18,441 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for application/xml is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser
+2026-05-22 13:39:18,441 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for text/xml is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser
+2026-05-22 13:39:18,441 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for text/vnd.wap.wml is org.apache.jmeter.protocol.http.parser.RegexpHTMLParser
+2026-05-22 13:39:18,441 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for text/css is org.apache.jmeter.protocol.http.parser.CssParser
+2026-05-22 13:39:18,501 INFO o.a.j.JMeter: Creating summariser <summary>
+2026-05-22 13:39:18,511 INFO o.a.j.r.d.ReportGenerator: ReportGenerator will use for Parsing the separator: ','
+2026-05-22 13:39:18,511 INFO o.a.j.r.d.ReportGenerator: Will generate report at end of test from  results file: results.jtl
+2026-05-22 13:39:18,511 INFO o.a.j.r.d.ReportGenerator: Reading report generator properties from: C:\Program Files\apache-jmeter-5.6.3\bin\reportgenerator.properties
+2026-05-22 13:39:18,513 INFO o.a.j.r.d.ReportGenerator: Merging with JMeter properties
+2026-05-22 13:39:18,518 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.temp_dir' not found, using default value 'temp' instead.
+2026-05-22 13:39:18,522 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.apdex_per_transaction' not found, using default value 'null' instead.
+2026-05-22 13:39:18,523 INFO o.a.j.r.c.ReportGeneratorConfiguration: apdex_per_transaction is empty, not APDEX per transaction customization
+2026-05-22 13:39:18,523 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.sample_filter' not found, using default value 'null' instead.
+2026-05-22 13:39:18,523 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.report_title' not found, using default value 'null' instead.
+2026-05-22 13:39:18,523 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.start_date' not found, using default value 'null' instead.
+2026-05-22 13:39:18,524 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.end_date' not found, using default value 'null' instead.
+2026-05-22 13:39:18,524 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.date_format' not found, using default value 'null' instead.
+2026-05-22 13:39:18,524 INFO o.a.j.r.c.ReportGeneratorConfiguration: Will use date range start date: null, end date: null
+2026-05-22 13:39:18,530 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.graph.totalTPS.exclude_controllers' not found, using default value 'false' instead.
+2026-05-22 13:39:18,530 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.graph.activeThreadsOverTime.exclude_controllers' not found, using default value 'false' instead.
+2026-05-22 13:39:18,531 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.graph.timeVsThreads.exclude_controllers' not found, using default value 'false' instead.
+2026-05-22 13:39:18,531 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.graph.responseTimeDistribution.exclude_controllers' not found, using default value 'false' instead.
+2026-05-22 13:39:18,531 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.graph.transactionsPerSecond.exclude_controllers' not found, using default value 'false' instead.
+2026-05-22 13:39:18,531 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.graph.responseTimePercentiles.exclude_controllers' not found, using default value 'false' instead.
+2026-05-22 13:39:18,531 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.graph.responseTimePercentilesOverTime.exclude_controllers' not found, using default value 'false' instead.
+2026-05-22 13:39:18,531 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.graph.responseTimesOverTime.exclude_controllers' not found, using default value 'false' instead.
+2026-05-22 13:39:18,532 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.graph.connectTimeOverTime.exclude_controllers' not found, using default value 'false' instead.
+2026-05-22 13:39:18,532 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.graph.latenciesOverTime.exclude_controllers' not found, using default value 'false' instead.
+2026-05-22 13:39:18,534 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.exporter.json.filters_only_sample_series' not found, using default value 'true' instead.
+2026-05-22 13:39:18,534 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.exporter.json.series_filter' not found, using default value '' instead.
+2026-05-22 13:39:18,534 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.exporter.json.show_controllers_only' not found, using default value 'false' instead.
+2026-05-22 13:39:18,535 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.exporter.html.filters_only_sample_series' not found, using default value 'true' instead.
+2026-05-22 13:39:18,535 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.exporter.html.series_filter' not found, using default value '' instead.
+2026-05-22 13:39:18,535 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.exporter.html.show_controllers_only' not found, using default value 'false' instead.
+2026-05-22 13:39:18,555 INFO o.a.j.e.StandardJMeterEngine: Running the test!
+2026-05-22 13:39:18,556 INFO o.a.j.s.SampleEvent: List of sample_variables: []
+2026-05-22 13:39:18,557 INFO o.a.j.s.SampleEvent: List of sample_variables: []
+2026-05-22 13:39:18,566 INFO o.a.j.e.u.CompoundVariable: Note: Function class names must contain the string: '.functions.'
+2026-05-22 13:39:18,567 INFO o.a.j.e.u.CompoundVariable: Note: Function class names must not contain the string: '.gui.'
+2026-05-22 13:39:18,675 INFO o.a.j.JMeter: Running test (1779431958675)
+2026-05-22 13:39:18,678 INFO o.a.j.e.StandardJMeterEngine: Starting setUp thread groups
+2026-05-22 13:39:18,678 INFO o.a.j.e.StandardJMeterEngine: Starting setUp ThreadGroup: 1 : Setup - Register Users 
+2026-05-22 13:39:18,678 INFO o.a.j.e.StandardJMeterEngine: Starting 50 threads for group Setup - Register Users.
+2026-05-22 13:39:18,678 INFO o.a.j.e.StandardJMeterEngine: Thread will continue on error
+2026-05-22 13:39:18,679 INFO o.a.j.t.ThreadGroup: Starting thread group... number=1 threads=50 ramp-up=5 delayedStart=false
+2026-05-22 13:39:18,692 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-1
+2026-05-22 13:39:18,720 INFO o.a.j.t.ThreadGroup: Started thread group number 1
+2026-05-22 13:39:18,720 INFO o.a.j.e.StandardJMeterEngine: Waiting for all setup thread groups to exit
+2026-05-22 13:39:18,729 INFO o.a.j.p.h.s.HTTPHCAbstractImpl: Local host = LAPTOP-NOPALZZZ
+2026-05-22 13:39:18,751 INFO o.a.j.p.h.s.HTTPHC4Impl: HTTP request retry count = 0
+2026-05-22 13:39:18,753 INFO o.a.j.s.SampleResult: Note: Sample TimeStamps are START times
+2026-05-22 13:39:18,753 INFO o.a.j.s.SampleResult: sampleresult.default.encoding is set to UTF-8
+2026-05-22 13:39:18,753 INFO o.a.j.s.SampleResult: sampleresult.useNanoTime=true
+2026-05-22 13:39:18,753 INFO o.a.j.s.SampleResult: sampleresult.nanoThreadSleep=5000
+2026-05-22 13:39:18,790 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-2
+2026-05-22 13:39:18,897 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-3
+2026-05-22 13:39:18,988 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-4
+2026-05-22 13:39:19,088 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-5
+2026-05-22 13:39:19,186 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-6
+2026-05-22 13:39:19,285 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-7
+2026-05-22 13:39:19,384 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-8
+2026-05-22 13:39:19,483 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-9
+2026-05-22 13:39:19,573 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-5
+2026-05-22 13:39:19,573 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-8
+2026-05-22 13:39:19,573 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-7
+2026-05-22 13:39:19,573 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-4
+2026-05-22 13:39:19,573 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-7
+2026-05-22 13:39:19,573 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-4
+2026-05-22 13:39:19,573 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-9
+2026-05-22 13:39:19,573 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-2
+2026-05-22 13:39:19,573 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-2
+2026-05-22 13:39:19,573 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-3
+2026-05-22 13:39:19,573 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-6
+2026-05-22 13:39:19,573 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-3
+2026-05-22 13:39:19,573 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-1
+2026-05-22 13:39:19,574 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-6
+2026-05-22 13:39:19,573 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-8
+2026-05-22 13:39:19,574 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-5
+2026-05-22 13:39:19,574 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-1
+2026-05-22 13:39:19,574 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-9
+2026-05-22 13:39:19,583 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-10
+2026-05-22 13:39:19,612 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-10
+2026-05-22 13:39:19,612 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-10
+2026-05-22 13:39:19,685 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-11
+2026-05-22 13:39:19,721 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-11
+2026-05-22 13:39:19,721 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-11
+2026-05-22 13:39:19,784 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-12
+2026-05-22 13:39:19,817 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-12
+2026-05-22 13:39:19,818 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-12
+2026-05-22 13:39:19,883 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-13
+2026-05-22 13:39:19,918 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-13
+2026-05-22 13:39:19,918 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-13
+2026-05-22 13:39:19,981 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-14
+2026-05-22 13:39:20,012 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-14
+2026-05-22 13:39:20,012 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-14
+2026-05-22 13:39:20,080 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-15
+2026-05-22 13:39:20,110 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-15
+2026-05-22 13:39:20,110 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-15
+2026-05-22 13:39:20,183 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-16
+2026-05-22 13:39:20,233 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-16
+2026-05-22 13:39:20,234 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-16
+2026-05-22 13:39:20,282 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-17
+2026-05-22 13:39:20,317 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-17
+2026-05-22 13:39:20,318 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-17
+2026-05-22 13:39:20,381 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-18
+2026-05-22 13:39:20,412 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-18
+2026-05-22 13:39:20,412 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-18
+2026-05-22 13:39:20,481 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-19
+2026-05-22 13:39:20,523 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-19
+2026-05-22 13:39:20,523 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-19
+2026-05-22 13:39:20,580 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-20
+2026-05-22 13:39:20,612 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-20
+2026-05-22 13:39:20,613 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-20
+2026-05-22 13:39:20,682 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-21
+2026-05-22 13:39:20,718 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-21
+2026-05-22 13:39:20,719 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-21
+2026-05-22 13:39:20,780 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-22
+2026-05-22 13:39:20,815 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-22
+2026-05-22 13:39:20,816 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-22
+2026-05-22 13:39:20,880 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-23
+2026-05-22 13:39:20,911 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-23
+2026-05-22 13:39:20,911 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-23
+2026-05-22 13:39:20,981 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-24
+2026-05-22 13:39:21,020 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-24
+2026-05-22 13:39:21,020 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-24
+2026-05-22 13:39:21,081 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-25
+2026-05-22 13:39:21,110 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-25
+2026-05-22 13:39:21,112 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-25
+2026-05-22 13:39:21,181 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-26
+2026-05-22 13:39:21,217 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-26
+2026-05-22 13:39:21,218 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-26
+2026-05-22 13:39:21,282 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-27
+2026-05-22 13:39:21,315 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-27
+2026-05-22 13:39:21,315 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-27
+2026-05-22 13:39:21,381 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-28
+2026-05-22 13:39:21,400 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-28
+2026-05-22 13:39:21,401 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-28
+2026-05-22 13:39:21,481 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-29
+2026-05-22 13:39:21,507 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-29
+2026-05-22 13:39:21,507 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-29
+2026-05-22 13:39:21,580 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-30
+2026-05-22 13:39:21,623 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-30
+2026-05-22 13:39:21,623 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-30
+2026-05-22 13:39:21,681 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-31
+2026-05-22 13:39:21,711 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-31
+2026-05-22 13:39:21,711 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-31
+2026-05-22 13:39:21,783 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-32
+2026-05-22 13:39:21,832 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-32
+2026-05-22 13:39:21,832 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-32
+2026-05-22 13:39:21,881 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-33
+2026-05-22 13:39:21,905 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-33
+2026-05-22 13:39:21,906 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-33
+2026-05-22 13:39:21,982 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-34
+2026-05-22 13:39:22,009 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-34
+2026-05-22 13:39:22,009 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-34
+2026-05-22 13:39:22,081 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-35
+2026-05-22 13:39:22,105 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-35
+2026-05-22 13:39:22,105 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-35
+2026-05-22 13:39:22,182 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-36
+2026-05-22 13:39:22,204 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-36
+2026-05-22 13:39:22,204 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-36
+2026-05-22 13:39:22,281 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-37
+2026-05-22 13:39:22,320 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-37
+2026-05-22 13:39:22,321 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-37
+2026-05-22 13:39:22,380 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-38
+2026-05-22 13:39:22,408 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-38
+2026-05-22 13:39:22,408 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-38
+2026-05-22 13:39:22,481 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-39
+2026-05-22 13:39:22,504 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-39
+2026-05-22 13:39:22,505 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-39
+2026-05-22 13:39:22,581 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-40
+2026-05-22 13:39:22,606 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-40
+2026-05-22 13:39:22,606 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-40
+2026-05-22 13:39:22,683 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-41
+2026-05-22 13:39:22,710 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-41
+2026-05-22 13:39:22,710 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-41
+2026-05-22 13:39:22,780 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-42
+2026-05-22 13:39:22,808 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-42
+2026-05-22 13:39:22,809 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-42
+2026-05-22 13:39:22,881 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-43
+2026-05-22 13:39:22,914 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-43
+2026-05-22 13:39:22,914 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-43
+2026-05-22 13:39:22,979 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-44
+2026-05-22 13:39:23,003 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-44
+2026-05-22 13:39:23,004 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-44
+2026-05-22 13:39:23,081 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-45
+2026-05-22 13:39:23,104 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-45
+2026-05-22 13:39:23,104 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-45
+2026-05-22 13:39:23,181 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-46
+2026-05-22 13:39:23,200 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-46
+2026-05-22 13:39:23,200 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-46
+2026-05-22 13:39:23,281 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-47
+2026-05-22 13:39:23,303 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-47
+2026-05-22 13:39:23,303 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-47
+2026-05-22 13:39:23,382 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-48
+2026-05-22 13:39:23,411 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-48
+2026-05-22 13:39:23,411 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-48
+2026-05-22 13:39:23,481 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-49
+2026-05-22 13:39:23,508 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-49
+2026-05-22 13:39:23,508 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-49
+2026-05-22 13:39:23,581 INFO o.a.j.t.JMeterThread: Thread started: Setup - Register Users 1-50
+2026-05-22 13:39:23,607 INFO o.a.j.t.JMeterThread: Thread is done: Setup - Register Users 1-50
+2026-05-22 13:39:23,608 INFO o.a.j.t.JMeterThread: Thread finished: Setup - Register Users 1-50
+2026-05-22 13:39:23,608 INFO o.a.j.e.StandardJMeterEngine: All Setup Threads have ended
+2026-05-22 13:39:23,631 INFO o.a.j.e.StandardJMeterEngine: Starting ThreadGroup: 1 : Main - Login and Get Profile
+2026-05-22 13:39:23,631 INFO o.a.j.e.StandardJMeterEngine: Starting 50 threads for group Main - Login and Get Profile.
+2026-05-22 13:39:23,631 INFO o.a.j.e.StandardJMeterEngine: Thread will continue on error
+2026-05-22 13:39:23,632 INFO o.a.j.t.ThreadGroup: Starting thread group... number=1 threads=50 ramp-up=10 delayedStart=false
+2026-05-22 13:39:23,634 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-1
+2026-05-22 13:39:23,657 INFO o.a.j.t.ThreadGroup: Started thread group number 1
+2026-05-22 13:39:23,658 INFO o.a.j.e.StandardJMeterEngine: All thread groups have been started
+2026-05-22 13:39:23,836 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-2
+2026-05-22 13:39:24,035 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-3
+2026-05-22 13:39:24,234 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-4
+2026-05-22 13:39:24,434 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-5
+2026-05-22 13:39:24,636 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-6
+2026-05-22 13:39:24,833 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-7
+2026-05-22 13:39:25,033 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-8
+2026-05-22 13:39:25,233 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-9
+2026-05-22 13:39:25,433 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-10
+2026-05-22 13:39:25,633 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-11
+2026-05-22 13:39:25,833 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-12
+2026-05-22 13:39:26,033 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-13
+2026-05-22 13:39:26,233 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-14
+2026-05-22 13:39:26,356 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-2
+2026-05-22 13:39:26,356 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-2
+2026-05-22 13:39:26,420 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-1
+2026-05-22 13:39:26,421 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-1
+2026-05-22 13:39:26,433 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-15
+2026-05-22 13:39:26,467 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-3
+2026-05-22 13:39:26,467 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-3
+2026-05-22 13:39:26,633 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-16
+2026-05-22 13:39:26,722 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-4
+2026-05-22 13:39:26,722 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-4
+2026-05-22 13:39:26,825 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-5
+2026-05-22 13:39:26,825 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-5
+2026-05-22 13:39:26,834 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-17
+2026-05-22 13:39:27,034 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-6
+2026-05-22 13:39:27,034 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-6
+2026-05-22 13:39:27,034 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-18
+2026-05-22 13:39:27,234 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-19
+2026-05-22 13:39:27,268 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-7
+2026-05-22 13:39:27,268 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-7
+2026-05-22 13:39:27,433 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-20
+2026-05-22 13:39:27,460 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-8
+2026-05-22 13:39:27,460 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-8
+2026-05-22 13:39:27,626 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-9
+2026-05-22 13:39:27,626 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-9
+2026-05-22 13:39:27,634 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-21
+2026-05-22 13:39:27,834 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-22
+2026-05-22 13:39:27,923 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-10
+2026-05-22 13:39:27,923 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-10
+2026-05-22 13:39:28,033 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-23
+2026-05-22 13:39:28,168 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-11
+2026-05-22 13:39:28,169 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-11
+2026-05-22 13:39:28,235 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-24
+2026-05-22 13:39:28,434 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-25
+2026-05-22 13:39:28,635 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-26
+2026-05-22 13:39:28,694 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-12
+2026-05-22 13:39:28,694 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-12
+2026-05-22 13:39:28,839 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-27
+2026-05-22 13:39:29,044 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-28
+2026-05-22 13:39:29,243 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-29
+2026-05-22 13:39:29,365 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-13
+2026-05-22 13:39:29,365 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-13
+2026-05-22 13:39:29,446 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-30
+2026-05-22 13:39:29,649 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-31
+2026-05-22 13:39:29,839 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-32
+2026-05-22 13:39:30,042 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-33
+2026-05-22 13:39:30,046 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-14
+2026-05-22 13:39:30,047 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-14
+2026-05-22 13:39:30,068 INFO o.a.j.r.Summariser: summary +    854 in 00:00:11 =   75.2/s Avg:    84 Min:     3 Max:   709 Err:    50 (5.85%) Active: 19 Started: 33 Finished: 14
+2026-05-22 13:39:30,244 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-34
+2026-05-22 13:39:30,446 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-35
+2026-05-22 13:39:30,638 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-15
+2026-05-22 13:39:30,638 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-15
+2026-05-22 13:39:30,650 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-36
+2026-05-22 13:39:30,846 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-37
+2026-05-22 13:39:31,048 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-38
+2026-05-22 13:39:31,250 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-39
+2026-05-22 13:39:31,437 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-40
+2026-05-22 13:39:31,639 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-41
+2026-05-22 13:39:31,839 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-42
+2026-05-22 13:39:31,901 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-16
+2026-05-22 13:39:31,901 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-16
+2026-05-22 13:39:32,043 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-43
+2026-05-22 13:39:32,247 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-44
+2026-05-22 13:39:32,449 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-45
+2026-05-22 13:39:32,487 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-17
+2026-05-22 13:39:32,488 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-17
+2026-05-22 13:39:32,637 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-46
+2026-05-22 13:39:32,838 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-47
+2026-05-22 13:39:33,044 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-48
+2026-05-22 13:39:33,246 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-49
+2026-05-22 13:39:33,447 INFO o.a.j.t.JMeterThread: Thread started: Main - Login and Get Profile 1-50
+2026-05-22 13:39:33,949 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-18
+2026-05-22 13:39:33,949 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-18
+2026-05-22 13:39:36,047 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-19
+2026-05-22 13:39:36,048 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-19
+2026-05-22 13:39:36,888 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-20
+2026-05-22 13:39:36,889 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-20
+2026-05-22 13:39:39,164 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-21
+2026-05-22 13:39:39,164 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-21
+2026-05-22 13:39:40,600 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-23
+2026-05-22 13:39:40,600 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-23
+2026-05-22 13:39:41,021 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-22
+2026-05-22 13:39:41,022 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-22
+2026-05-22 13:39:42,034 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-24
+2026-05-22 13:39:42,034 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-24
+2026-05-22 13:39:42,088 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-26
+2026-05-22 13:39:42,088 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-26
+2026-05-22 13:39:42,320 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-25
+2026-05-22 13:39:42,321 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-25
+2026-05-22 13:39:42,631 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-28
+2026-05-22 13:39:42,632 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-28
+2026-05-22 13:39:42,906 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-27
+2026-05-22 13:39:42,907 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-27
+2026-05-22 13:39:42,997 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-31
+2026-05-22 13:39:42,998 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-31
+2026-05-22 13:39:43,749 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-29
+2026-05-22 13:39:43,749 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-29
+2026-05-22 13:39:43,834 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-32
+2026-05-22 13:39:43,834 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-32
+2026-05-22 13:39:43,841 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-30
+2026-05-22 13:39:43,841 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-30
+2026-05-22 13:39:44,108 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-35
+2026-05-22 13:39:44,109 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-35
+2026-05-22 13:39:44,232 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-33
+2026-05-22 13:39:44,232 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-33
+2026-05-22 13:39:44,631 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-37
+2026-05-22 13:39:44,632 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-37
+2026-05-22 13:39:44,633 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-34
+2026-05-22 13:39:44,633 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-34
+2026-05-22 13:39:44,684 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-36
+2026-05-22 13:39:44,684 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-36
+2026-05-22 13:39:44,701 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-38
+2026-05-22 13:39:44,701 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-38
+2026-05-22 13:39:44,781 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-43
+2026-05-22 13:39:44,782 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-43
+2026-05-22 13:39:44,783 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-42
+2026-05-22 13:39:44,783 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-42
+2026-05-22 13:39:44,920 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-44
+2026-05-22 13:39:44,920 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-44
+2026-05-22 13:39:44,947 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-39
+2026-05-22 13:39:44,947 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-39
+2026-05-22 13:39:45,015 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-48
+2026-05-22 13:39:45,016 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-48
+2026-05-22 13:39:45,066 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-46
+2026-05-22 13:39:45,066 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-46
+2026-05-22 13:39:45,081 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-40
+2026-05-22 13:39:45,081 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-40
+2026-05-22 13:39:45,137 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-41
+2026-05-22 13:39:45,137 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-45
+2026-05-22 13:39:45,137 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-41
+2026-05-22 13:39:45,138 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-45
+2026-05-22 13:39:45,398 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-47
+2026-05-22 13:39:45,399 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-47
+2026-05-22 13:39:45,456 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-49
+2026-05-22 13:39:45,457 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-49
+2026-05-22 13:39:45,596 INFO o.a.j.t.JMeterThread: Thread is done: Main - Login and Get Profile 1-50
+2026-05-22 13:39:45,596 INFO o.a.j.t.JMeterThread: Thread finished: Main - Login and Get Profile 1-50
+2026-05-22 13:39:45,597 INFO o.a.j.e.StandardJMeterEngine: Notifying test listeners of end of test
+2026-05-22 13:39:45,599 INFO o.a.j.r.Summariser: summary +   1196 in 00:00:16 =   76.8/s Avg:   341 Min:     6 Max:  1061 Err:     0 (0.00%) Active: 0 Started: 50 Finished: 50
+2026-05-22 13:39:45,601 INFO o.a.j.r.Summariser: summary =   2050 in 00:00:27 =   76.1/s Avg:   234 Min:     3 Max:  1061 Err:    50 (2.44%)
+2026-05-22 13:39:45,602 INFO o.a.j.JMeter: Generating Dashboard
+2026-05-22 13:39:45,603 INFO o.a.j.r.d.ReportGenerator: Flushing result collector before report Generation
+2026-05-22 13:39:45,636 INFO o.a.j.r.p.NormalizerSampleConsumer: Using format, 'ms', to parse timeStamp field
+2026-05-22 13:39:46,092 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.AggregateConsumer#stopProducing(): beginDate produced 0 samples
+2026-05-22 13:39:46,092 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.AggregateConsumer#stopProducing(): endDate produced 0 samples
+2026-05-22 13:39:46,101 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.ApdexSummaryConsumer#stopProducing(): apdexSummary produced 0 samples
+2026-05-22 13:39:46,102 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.RequestsSummaryConsumer#stopProducing(): requestsSummary produced 0 samples
+2026-05-22 13:39:46,129 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.StatisticsSummaryConsumer#stopProducing(): statisticsSummary produced 0 samples
+2026-05-22 13:39:46,139 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.Top5ErrorsBySamplerConsumer#stopProducing(): top5ErrorsBySampler produced 0 samples
+2026-05-22 13:39:46,139 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.ErrorsSummaryConsumer#stopProducing(): errorsSummary produced 0 samples
+2026-05-22 13:39:46,140 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.graph.impl.HitsPerSecondGraphConsumer#stopProducing(): hitsPerSecond produced 0 samples
+2026-05-22 13:39:46,300 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.graph.impl.LatencyVSRequestGraphConsumer#stopProducing(): latencyVsRequest produced 0 samples
+2026-05-22 13:39:46,300 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.graph.impl.SyntheticResponseTimeDistributionGraphConsumer#stopProducing(): syntheticResponseTimeDistribution produced 0 samples
+2026-05-22 13:39:46,302 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.graph.impl.BytesThroughputGraphConsumer#stopProducing(): bytesThroughputOverTime produced 0 samples
+2026-05-22 13:39:46,303 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.graph.impl.CodesPerSecondGraphConsumer#stopProducing(): codesPerSecond produced 0 samples
+2026-05-22 13:39:46,348 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.graph.impl.ResponseTimeVSRequestGraphConsumer#stopProducing(): responseTimeVsRequest produced 0 samples
+2026-05-22 13:39:46,350 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.FilterConsumer#stopProducing(): startIntervalControlerFilter produced 14350 samples
+2026-05-22 13:39:46,350 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.graph.impl.TotalTPSGraphConsumer#stopProducing(): totalTPS produced 0 samples
+2026-05-22 13:39:46,351 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.graph.impl.ActiveThreadsGraphConsumer#stopProducing(): activeThreadsOverTime produced 0 samples
+2026-05-22 13:39:46,351 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.graph.impl.TimeVSThreadGraphConsumer#stopProducing(): timeVsThreads produced 0 samples
+2026-05-22 13:39:46,351 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.graph.impl.ResponseTimeDistributionGraphConsumer#stopProducing(): responseTimeDistribution produced 0 samples
+2026-05-22 13:39:46,352 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.graph.impl.TransactionsPerSecondGraphConsumer#stopProducing(): transactionsPerSecond produced 0 samples
+2026-05-22 13:39:46,352 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.graph.impl.ResponseTimePercentilesGraphConsumer#stopProducing(): responseTimePercentiles produced 0 samples
+2026-05-22 13:39:46,360 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.graph.impl.ResponseTimePercentilesOverTimeGraphConsumer#stopProducing(): responseTimePercentilesOverTime produced 0 samples
+2026-05-22 13:39:46,362 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.graph.impl.ResponseTimeOverTimeGraphConsumer#stopProducing(): responseTimesOverTime produced 0 samples
+2026-05-22 13:39:46,362 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.graph.impl.ConnectTimeOverTimeGraphConsumer#stopProducing(): connectTimeOverTime produced 0 samples
+2026-05-22 13:39:46,362 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.graph.impl.LatencyOverTimeGraphConsumer#stopProducing(): latenciesOverTime produced 0 samples
+2026-05-22 13:39:46,364 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.FilterConsumer#stopProducing(): nameFilter produced 30750 samples
+2026-05-22 13:39:46,364 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.FilterConsumer#stopProducing(): dateRangeFilter produced 6150 samples
+2026-05-22 13:39:46,364 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.NormalizerSampleConsumer#stopProducing(): normalizer produced 2050 samples
+2026-05-22 13:39:46,366 INFO o.a.j.r.p.CsvFileSampleSource: produce(): 2050 samples produced in 664ms on channel 0
+2026-05-22 13:39:46,366 INFO o.a.j.r.d.ReportGenerator: Exporting data using exporter:'json' of className:'org.apache.jmeter.report.dashboard.JsonExporter'
+2026-05-22 13:39:46,672 INFO o.a.j.r.d.JsonExporter: Found data for consumer statisticsSummary in context
+2026-05-22 13:39:46,672 INFO o.a.j.r.d.JsonExporter: Creating statistics for overall
+2026-05-22 13:39:46,674 INFO o.a.j.r.d.JsonExporter: Creating statistics for other transactions
+2026-05-22 13:39:46,675 INFO o.a.j.r.d.JsonExporter: Checking output folder
+2026-05-22 13:39:46,677 INFO o.a.j.r.d.JsonExporter: Writing statistics JSON to C:\Users\Asus\New Journey\be-authentication\build\reports\jmeter\statistics.json
+2026-05-22 13:39:46,782 INFO o.a.j.r.d.ReportGenerator: Exporting data using exporter:'html' of className:'org.apache.jmeter.report.dashboard.HtmlTemplateExporter'
+2026-05-22 13:39:46,788 INFO o.a.j.r.d.HtmlTemplateExporter: Will generate dashboard in folder: C:\Users\Asus\New Journey\be-authentication\build\reports\jmeter
+2026-05-22 13:39:47,131 INFO o.a.j.r.d.HtmlTemplateExporter: Report will be generated in: C:\Users\Asus\New Journey\be-authentication\build\reports\jmeter, creating folder structure
+2026-05-22 13:39:47,137 INFO o.a.j.r.d.TemplateVisitor: Copying folder from 'C:\Program Files\apache-jmeter-5.6.3\bin\report-template' to 'C:\Users\Asus\New Journey\be-authentication\build\reports\jmeter', got message: C:\Users\Asus\New Journey\be-authentication\build\reports\jmeter, found non empty folder with following content [C:\Users\Asus\New Journey\be-authentication\build\reports\jmeter\statistics.json], will be ignored
+2026-05-22 13:39:48,312 INFO o.a.j.JMeter: Dashboard generated
