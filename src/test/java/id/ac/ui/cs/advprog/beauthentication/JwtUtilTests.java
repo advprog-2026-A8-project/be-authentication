@@ -107,4 +107,24 @@ class JwtUtilTests {
         String token = jwtUtil.generateToken("user@example.com", "TITIPER");
         assertNull(jwtUtil.extractUserId(token));
     }
+
+    @Test
+    void validateToken_expiredToken_isNotCached() {
+        ReflectionTestUtils.setField(jwtUtil, "expiration", -1000L);
+        String expiredToken = jwtUtil.generateToken("user@example.com");
+        ReflectionTestUtils.setField(jwtUtil, "expiration", TEST_EXPIRATION);
+
+        assertFalse(jwtUtil.validateToken(expiredToken));
+        assertNull(jwtUtil.getClaimsCache().getIfPresent(expiredToken));
+        assertFalse(jwtUtil.validateToken(expiredToken));
+    }
+
+    @Test
+    void validateToken_validToken_isCachedAfterFirstCall() {
+        String token = jwtUtil.generateToken("user@example.com");
+
+        assertNull(jwtUtil.getClaimsCache().getIfPresent(token));
+        assertTrue(jwtUtil.validateToken(token));
+        assertNotNull(jwtUtil.getClaimsCache().getIfPresent(token));
+    }
 }
