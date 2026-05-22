@@ -1,5 +1,7 @@
 package id.ac.ui.cs.advprog.beauthentication.utils;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class JwtUtil {
@@ -21,6 +24,15 @@ public class JwtUtil {
 
     @Value("${jwt.expiration}")
     private Long expiration;
+
+    private final Cache<String, Claims> claimsCache = Caffeine.newBuilder()
+            .maximumSize(500)
+            .expireAfterWrite(10, TimeUnit.MINUTES)
+            .build();
+
+    Cache<String, Claims> getClaimsCache() {
+        return claimsCache;
+    }
 
     private Key getSigningKey() {
         return Keys.hmacShaKeyFor(secret.getBytes());
@@ -54,11 +66,13 @@ public class JwtUtil {
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+        return claimsCache.get(token, t ->
+                Jwts.parserBuilder()
+                        .setSigningKey(getSigningKey())
+                        .build()
+                        .parseClaimsJws(t)
+                        .getBody()
+        );
     }
 
     public String extractRole(String token) {
