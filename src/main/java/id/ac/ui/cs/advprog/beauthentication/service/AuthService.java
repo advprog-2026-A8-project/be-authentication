@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.regex.Pattern;
 
 @Service
-public class AuthService {
+public class AuthService implements IAuthService {
 
     private static final int MIN_PASSWORD_LENGTH = 8;
 

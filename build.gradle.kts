@@ -5,6 +5,7 @@ plugins {
     id("org.springframework.boot") version "3.5.10"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.sonarqube") version "7.2.3.7755"
+    id("me.champeau.jmh") version "0.7.3"
 }
 
 group = "id.ac.ui.cs.advprog"
@@ -43,6 +44,13 @@ dependencies {
     implementation("io.jsonwebtoken:jjwt-api:0.11.5")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
+
+    implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+
+    jmh("org.openjdk.jmh:jmh-core:1.37")
+    jmh("org.openjdk.jmh:jmh-generator-annprocess:1.37")
+    jmhAnnotationProcessor("org.openjdk.jmh:jmh-generator-annprocess:1.37")
 }
 
 checkstyle {
@@ -60,6 +68,16 @@ tasks.jacocoTestReport {
     reports {
         xml.required.set(true)
     }
+}
+
+jmh {
+    iterations.set(5)
+    warmupIterations.set(3)
+    fork.set(1)
+    timeUnit.set("ms")
+    resultFormat.set("JSON")
+    resultsFile.set(project.file("${buildDir}/reports/jmh/results.json"))
+    benchmarkMode.set(listOf("avgt"))
 }
 
 sonar {

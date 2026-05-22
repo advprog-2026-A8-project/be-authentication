@@ -7,7 +7,7 @@ import id.ac.ui.cs.advprog.beauthentication.dto.RegisterRequest;
 import id.ac.ui.cs.advprog.beauthentication.dto.RegisterResponse;
 import id.ac.ui.cs.advprog.beauthentication.dto.TokenVerifyResponse;
 import id.ac.ui.cs.advprog.beauthentication.model.UserProfile;
-import id.ac.ui.cs.advprog.beauthentication.service.AuthService;
+import id.ac.ui.cs.advprog.beauthentication.service.IAuthService;
 import id.ac.ui.cs.advprog.beauthentication.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     @Autowired
-    private AuthService authService;
+    private IAuthService authService;
 
     @Autowired
     private JwtUtil jwtUtil;
