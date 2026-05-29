@@ -25,10 +25,10 @@ FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
 # Salin HANYA file .jar hasil build dari Stage 1 (membuat ukuran kontainer jauh lebih kecil)
-COPY --from=builder /app/build/libs/*-SNAPSHOT.jar app.jar
+COPY --from=builder /app/build/libs/*.jar app.jar
 
-# Buka port 8080 agar bisa diakses dari luar kontainer
-EXPOSE 8080
+# Buka port 3002 agar bisa diakses dari luar kontainer
+EXPOSE 3002
 
 # Perintah yang dijalankan saat kontainer menyala
 ENTRYPOINT ["java", "-jar", "app.jar"]

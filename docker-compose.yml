@@ -1,0 +1,43 @@
+services:
+  auth-postgres:
+    image: postgres:15-alpine
+    container_name: auth-postgres-dev
+    environment:
+      POSTGRES_DB: be_authentication
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    ports:
+      - "55432:5432"
+    volumes:
+      - auth_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d be_authentication"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  auth-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: auth-app-dev
+    depends_on:
+      auth-postgres:
+        condition: service_healthy
+    environment:
+      SERVER_PORT: 3002
+      DB_URL: jdbc:postgresql://auth-postgres:5432/be_authentication
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_DRIVER: ${DB_DRIVER:-org.postgresql.Driver}
+      DB_DIALECT: ${DB_DIALECT:-org.hibernate.dialect.PostgreSQLDialect}
+      DDL_AUTO: ${DDL_AUTO:-update}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
+      RATE_LIMIT_LOGIN: ${RATE_LIMIT_LOGIN:-5}
+      RATE_LIMIT_REGISTER: ${RATE_LIMIT_REGISTER:-3}
+    ports:
+      - "3002:3002"
+
+volumes:
+  auth_pgdata:
